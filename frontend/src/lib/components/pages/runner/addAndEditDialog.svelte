@@ -1,0 +1,96 @@
+<script lang="ts">
+  import { buttonVariants } from "$lib/components/ui/button"
+  import * as Dialog from "$lib/components/ui/dialog"
+  import Input from "$lib/components/ui/input/input.svelte"
+  import { Label } from "$lib/components/ui/label"
+  import { Plus, Settings, Trash } from "@lucide/svelte"
+  import { type models } from "$lib/wailsjs/go/models"
+  import { Textarea } from "$lib/components/ui/textarea"
+  import Button from "$lib/components/ui/button/button.svelte"
+  import { WriteProblem } from "$lib/wailsjs/go/models/ProblemService"
+
+  let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
+  let fieldProblem = $state(JSON.parse(JSON.stringify(problem ?? {}))) as models.Problem
+</script>
+
+<Dialog.Root>
+  <Dialog.Trigger
+    class={buttonVariants({ variant: "outline", class: "h-10" })}
+    disabled={dialogType == "edit" && !problem}
+  >
+    {#if dialogType == "add"}
+      <Plus /> Add
+    {:else if dialogType == "edit"}
+      <Settings /> Edit
+    {/if}
+  </Dialog.Trigger>
+
+  <Dialog.Content class="lg:max-w-4xl">
+    <Dialog.Header>
+      <Dialog.Title>
+        {#if dialogType == "add"}
+          Add a problem
+        {:else if dialogType == "edit"}
+          Edit current problem
+        {/if}
+      </Dialog.Title>
+    </Dialog.Header>
+
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div class="space-y-3">
+        <Label class="mb-2">ID</Label>
+        <Input
+          type="text"
+          placeholder="two_sum"
+          bind:value={fieldProblem.id}
+          disabled={dialogType == "edit"}
+        />
+        <Label class="mb-2">Label</Label>
+        <Input type="text" placeholder="Two sum" bind:value={fieldProblem.label} />
+        <Label class="mb-2">Description</Label>
+        <Textarea
+          placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+          bind:value={fieldProblem.description}
+        />
+      </div>
+
+      <div class="space-y-3">
+        <Label class="">Default Limits</Label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <Label class="mb-2">Time (ms)</Label>
+            <Input type="number" bind:value={fieldProblem.time} />
+          </div>
+          <div>
+            <Label class="mb-2">Memory (MB)</Label>
+            <Input type="number" bind:value={fieldProblem.memory} />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <Dialog.Footer class="border-t pt-5">
+      <Dialog.Close class="w-full">
+        {#if dialogType == "add"}
+          <Button
+            class="float-end"
+            variant="default"
+            onclick={() => {
+              WriteProblem(fieldProblem)
+            }}>Add problem</Button
+          >
+        {:else if dialogType == "edit"}
+          <div class="flex items-stretch justify-between">
+            <Button variant="destructive"><Trash /> Delete</Button>
+            <Button
+              variant="default"
+              onclick={() => {
+                WriteProblem(fieldProblem)
+              }}>Save changes</Button
+            >
+          </div>
+        {/if}
+      </Dialog.Close>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>

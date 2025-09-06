@@ -9,6 +9,11 @@ const config = {
       "@/*": "./path/to/lib/*"
     },
     adapter: adapter()
+  },
+  compilerOptions: {
+    experimental: {
+      async: true
+    }
   }
 }
 

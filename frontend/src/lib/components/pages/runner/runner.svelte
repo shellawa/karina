@@ -1,27 +1,23 @@
-<script lang="ts">
-  import * as Card from "$lib/components/ui/card/index.js"
-  import * as Select from "$lib/components/ui/select/index.js"
-  import { Button } from "$lib/components/ui/button/index.js"
-  import { Label } from "$lib/components/ui/label/index.js"
-  import { Badge } from "$lib/components/ui/badge/index.js"
-  import { ChartBar, Code, Download, Play, Plus, Settings, User } from "@lucide/svelte"
+<script module lang="ts">
+  import * as Card from "$lib/components/ui/card"
+  import * as Select from "$lib/components/ui/select"
+  import { Button } from "$lib/components/ui/button"
+  import { Label } from "$lib/components/ui/label"
+  import { Badge } from "$lib/components/ui/badge"
+  import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
+  import { GetProblems } from "$lib/wailsjs/go/models/ProblemService"
+  import AddAndEditDialog from "./addAndEditDialog.svelte"
+  import { EventsOn } from "$lib/wailsjs/runtime/runtime"
 
-  const problems = [
-    {
-      slug: "two_sum",
-      label: "Two Sum",
-      description:
-        "lorem ipsumLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
-    },
-    {
-      slug: "three_sum",
-      label: "Three Sum",
-      description:
-        "lorem ipsumLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam."
-    }
-  ]
-  let selectedProblemSlug = $state(problems[0].slug)
-  let selectedProblem = $derived(problems.find((x) => x.slug == selectedProblemSlug))
+  let problems = $state(await GetProblems())
+  // svelte-ignore state_referenced_locally
+  let selectedProblemId = $state(problems[0]?.id ?? "")
+  let selectedProblem = $derived(problems.find((x) => x.id == selectedProblemId))
+
+  EventsOn("problem:add", async (id) => {
+    problems = await GetProblems()
+    selectedProblemId = id
+  })
 </script>
 
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
@@ -37,14 +33,14 @@
       <Card.Content class="space-y-3">
         <div>
           <Label class="mb-2">Select problem</Label>
-          <Select.Root type="single" bind:value={selectedProblemSlug}>
+          <Select.Root type="single" bind:value={selectedProblemId}>
             <Select.Trigger>
               {selectedProblem?.label}
             </Select.Trigger>
 
             <Select.Content>
               {#each problems as problem}
-                <Select.Item value={problem.slug}>{problem.label}</Select.Item>
+                <Select.Item value={problem.id}>{problem.label}</Select.Item>
               {/each}
             </Select.Content>
           </Select.Root>
@@ -63,13 +59,14 @@
           <Play /> Run all participants
         </Button>
         <div class="grid grid-cols-2 gap-2">
-          <Button variant="outline" class="h-10">
-            <Plus /> Add
-          </Button>
+          {#key selectedProblemId}
+            <AddAndEditDialog
+              dialogType="add"
+              problem={{ id: "", description: "", label: "", time: 1500, memory: 512, tests: [] }}
+            />
 
-          <Button variant="outline" class="h-10">
-            <Settings /> Edit
-          </Button>
+            <AddAndEditDialog dialogType="edit" problem={selectedProblem!} />
+          {/key}
         </div>
 
         <Button variant="outline" class="h-10 w-full">

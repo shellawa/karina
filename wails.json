@@ -10,5 +10,10 @@
     "name": "shellawa",
     "email": "awasymmetry@gmail.com"
   },
-  "wailsjsdir": "./frontend/src/lib"
+  "wailsjsdir": "./frontend/src/lib",
+  "bindings": {
+    "ts_generation": {
+      "outputType": "interfaces"
+    }
+  }
 }

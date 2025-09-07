@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"karina/backend/models"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -14,11 +15,13 @@ import (
 var assets embed.FS
 
 func main() {
-	// Create an instance of the app structure
 	app := NewApp()
-
 	problemService := &models.ProblemService{}
-	// Create application with options
+	participantService := &models.ParticipantService{}
+
+	os.MkdirAll("data/problems", 0755)
+	os.MkdirAll("data/participants", 0755)
+
 	err := wails.Run(&options.App{
 		Title:  "karina",
 		Width:  1280,
@@ -30,9 +33,10 @@ func main() {
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			problemService.Initialize(ctx)
+			participantService.Initialize(ctx)
 		},
 		Bind: []interface{}{
-			app, problemService,
+			app, problemService, participantService,
 		},
 	})
 

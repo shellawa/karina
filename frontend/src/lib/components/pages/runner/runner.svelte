@@ -4,19 +4,27 @@
   import { Button } from "$lib/components/ui/button"
   import { Label } from "$lib/components/ui/label"
   import { Badge } from "$lib/components/ui/badge"
-  import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
+  import { ChartBar, Code, Download, Play, Plus, User } from "@lucide/svelte"
   import { GetProblems } from "$lib/wailsjs/go/models/ProblemService"
+  import { GetParticipants } from "$lib/wailsjs/go/models/ParticipantService"
   import AddAndEditDialog from "./addAndEditDialog.svelte"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
+  import AddParticipantDialog from "./addParticipantDialog.svelte"
 
   let problems = $state(await GetProblems())
+  let participants = $state(await GetParticipants())
+
   // svelte-ignore state_referenced_locally
   let selectedProblemId = $state(problems[0]?.id ?? "")
   let selectedProblem = $derived(problems.find((x) => x.id == selectedProblemId))
 
-  EventsOn("problem:add", async (id) => {
+  EventsOn("problem:change", async (id) => {
     problems = await GetProblems()
     selectedProblemId = id
+  })
+
+  EventsOn("participant:change", async () => {
+    participants = await GetParticipants()
   })
 </script>
 
@@ -62,7 +70,7 @@
           {#key selectedProblemId}
             <AddAndEditDialog
               dialogType="add"
-              problem={{ id: "", description: "", label: "", time: 1500, memory: 512, tests: [] }}
+              problem={{ id: "", description: "", label: "", time: 1500, memory: 512 }}
             />
 
             <AddAndEditDialog dialogType="edit" problem={selectedProblem!} />
@@ -87,9 +95,17 @@
 
   <Card.Root class="lg:col-span-3">
     <Card.Header>
-      <Card.Title class="flex items-center gap-x-2">
-        <User class="h-5 w-5" />
-        Leaderboard
+      <Card.Title class="flex items-center justify-between">
+        <div class="flex items-center gap-x-2">
+          <User class="h-5 w-5" />
+          Leaderboard
+        </div>
+        {#key participants}
+          <AddParticipantDialog
+            participant={{ id: "", name: "", organization: "" }}
+            problemId={selectedProblemId}
+          />
+        {/key}
       </Card.Title>
     </Card.Header>
     <Card.Content>
@@ -107,47 +123,49 @@
 
       <!-- table content -->
       <div class="space-y-2">
-        <div
-          class="grid-cols-22 grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
-        >
-          <!-- rank -->
-          <div class="col-span-2 flex items-center font-medium text-gray-600">#1</div>
+        {#each participants as participant, index}
+          <div
+            class="grid-cols-22 grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
+          >
+            <!-- rank -->
+            <div class="col-span-2 flex items-center font-medium text-gray-600">#{index + 1}</div>
 
-          <!-- name and organization -->
-          <div class="col-span-6">
-            <div class="font-medium">Alice Johnson</div>
-            <div class="text-xs text-gray-500">United Nations</div>
-          </div>
+            <!-- name and organization -->
+            <div class="col-span-6">
+              <div class="font-medium">{participant.name}</div>
+              <div class="text-xs text-gray-500">{participant.organization}</div>
+            </div>
 
-          <!-- language badge -->
-          <div class="col-span-4 flex items-center">
-            <Badge variant="outline">Python</Badge>
-          </div>
+            <!-- language badge -->
+            <div class="col-span-4 flex items-center">
+              <Badge variant="outline">Python</Badge>
+            </div>
 
-          <!-- status badge and passed/total -->
-          <div class="col-span-4 flex items-center">
-            <div class="flex flex-col items-center">
-              <Badge class="bg-green-400">Accepted</Badge>
-              <div class="text-xs text-gray-500">10/10</div>
+            <!-- status badge and passed/total -->
+            <div class="col-span-4 flex items-center">
+              <div class="flex flex-col items-center">
+                <Badge class="bg-green-400">Accepted</Badge>
+                <div class="text-xs text-gray-500">10/10</div>
+              </div>
+            </div>
+
+            <!-- avg time and time range -->
+            <div class="col-span-3 flex items-center font-mono">
+              <div class="flex flex-col items-center">
+                <div class="">123ms</div>
+                <div class="text-xs text-gray-500">54-612</div>
+              </div>
+            </div>
+
+            <!-- avg memory and memory range -->
+            <div class="col-span-3 flex items-center font-mono">
+              <div class="flex flex-col items-center">
+                <div class="">64MB</div>
+                <div class="text-xs text-gray-500">21-727</div>
+              </div>
             </div>
           </div>
-
-          <!-- avg time and time range -->
-          <div class="col-span-3 flex items-center font-mono">
-            <div class="flex flex-col items-center">
-              <div class="">123ms</div>
-              <div class="text-xs text-gray-500">54-612</div>
-            </div>
-          </div>
-
-          <!-- avg memory and memory range -->
-          <div class="col-span-3 flex items-center font-mono">
-            <div class="flex flex-col items-center">
-              <div class="">64MB</div>
-              <div class="text-xs text-gray-500">21-727</div>
-            </div>
-          </div>
-        </div>
+        {/each}
       </div>
     </Card.Content>
   </Card.Root>

@@ -4,17 +4,15 @@ import (
 	"context"
 	"os"
 
-	"github.com/sdomino/scribble"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Problem struct {
-	Id          string   `json:"id"`
-	Label       string   `json:"label"`
-	Description string   `json:"description"`
-	Time        int      `json:"time"`
-	Memory      int      `json:"memory"`
-	Tests       []string `json:"tests"`
+	Id          string `json:"id"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	Time        int    `json:"time"`
+	Memory      int    `json:"memory"`
 }
 
 type ProblemService struct {
@@ -25,11 +23,12 @@ func (s *ProblemService) Initialize(ctx context.Context) {
 	s.ctx = ctx
 }
 
-var db, _ = scribble.New("data/problems", nil)
-
 func (s *ProblemService) WriteProblem(p Problem) {
-	db.Write(p.Id, "specs", p)
-	runtime.EventsEmit(s.ctx, "problem:add", p.Id)
+	if len(p.Id) == 0 {
+		return
+	}
+	db.Write("problems/"+p.Id, "specs", p)
+	runtime.EventsEmit(s.ctx, "problem:change", p.Id)
 }
 
 func (s *ProblemService) GetProblems() []Problem {
@@ -42,7 +41,7 @@ func (s *ProblemService) GetProblems() []Problem {
 		}
 
 		specs := Problem{}
-		db.Read(entry.Name(), "specs", &specs)
+		db.Read("problems/"+entry.Name(), "specs", &specs)
 		problems = append(problems, specs)
 	}
 	return problems

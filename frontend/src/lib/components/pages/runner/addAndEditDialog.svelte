@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { buttonVariants } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
   import Input from "$lib/components/ui/input/input.svelte"
   import { Label } from "$lib/components/ui/label"
   import { Plus, Settings, Trash } from "@lucide/svelte"
   import { type models } from "$lib/wailsjs/go/models"
   import { Textarea } from "$lib/components/ui/textarea"
-  import Button from "$lib/components/ui/button/button.svelte"
+  import { Button, buttonVariants } from "$lib/components/ui/button"
   import { WriteProblem } from "$lib/wailsjs/go/models/ProblemService"
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
@@ -70,27 +69,30 @@
     </div>
 
     <Dialog.Footer class="border-t pt-5">
-      <Dialog.Close class="w-full">
-        {#if dialogType == "add"}
+      {#if dialogType == "add"}
+        <Dialog.Close class="float-right">
           <Button
-            class="float-end"
             variant="default"
             onclick={() => {
               WriteProblem(fieldProblem)
             }}>Add problem</Button
           >
-        {:else if dialogType == "edit"}
-          <div class="flex items-stretch justify-between">
+        </Dialog.Close>
+      {:else if dialogType == "edit"}
+        <div class="flex w-full items-stretch justify-between">
+          <Dialog.Close>
             <Button variant="destructive"><Trash /> Delete</Button>
+          </Dialog.Close>
+          <Dialog.Close>
             <Button
               variant="default"
               onclick={() => {
                 WriteProblem(fieldProblem)
               }}>Save changes</Button
             >
-          </div>
-        {/if}
-      </Dialog.Close>
+          </Dialog.Close>
+        </div>
+      {/if}
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

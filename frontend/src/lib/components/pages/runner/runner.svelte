@@ -1,14 +1,14 @@
 <script module lang="ts">
-  import * as Card from "$lib/components/ui/card"
-  import * as Select from "$lib/components/ui/select"
-  import { Button } from "$lib/components/ui/button"
-  import { Label } from "$lib/components/ui/label"
   import { Badge } from "$lib/components/ui/badge"
-  import { ChartBar, Code, Download, Play, Plus, User } from "@lucide/svelte"
-  import { GetProblems } from "$lib/wailsjs/go/models/ProblemService"
+  import { Button } from "$lib/components/ui/button"
+  import * as Card from "$lib/components/ui/card"
+  import { Label } from "$lib/components/ui/label"
+  import * as Select from "$lib/components/ui/select"
   import { GetParticipants } from "$lib/wailsjs/go/models/ParticipantService"
-  import AddAndEditDialog from "./addAndEditDialog.svelte"
+  import { GetProblems } from "$lib/wailsjs/go/models/ProblemService"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
+  import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
+  import AddAndEditDialog from "./addAndEditDialog.svelte"
   import AddParticipantDialog from "./addParticipantDialog.svelte"
 
   let problems = $state(await GetProblems())
@@ -133,7 +133,9 @@
             <!-- name and organization -->
             <div class="col-span-6">
               <div class="font-medium">{participant.name}</div>
-              <div class="text-xs text-gray-500">{participant.organization}</div>
+              <div class="text-xs text-gray-500">
+                {participant.id} &bull; {participant.organization}
+              </div>
             </div>
 
             <!-- language badge -->

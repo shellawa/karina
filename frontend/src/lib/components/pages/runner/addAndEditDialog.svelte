@@ -1,12 +1,12 @@
 <script lang="ts">
+  import { Button, buttonVariants } from "$lib/components/ui/button"
   import * as Dialog from "$lib/components/ui/dialog"
   import Input from "$lib/components/ui/input/input.svelte"
   import { Label } from "$lib/components/ui/label"
-  import { Plus, Settings, Trash } from "@lucide/svelte"
-  import { type models } from "$lib/wailsjs/go/models"
   import { Textarea } from "$lib/components/ui/textarea"
-  import { Button, buttonVariants } from "$lib/components/ui/button"
+  import { type models } from "$lib/wailsjs/go/models"
   import { WriteProblem } from "$lib/wailsjs/go/models/ProblemService"
+  import { Plus, Settings, Trash } from "@lucide/svelte"
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
   let fieldProblem = $state(JSON.parse(JSON.stringify(problem ?? {}))) as models.Problem

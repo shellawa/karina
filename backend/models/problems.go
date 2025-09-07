@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"os"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -45,4 +46,17 @@ func (s *ProblemService) GetProblems() []Problem {
 		problems = append(problems, specs)
 	}
 	return problems
+}
+
+func (s *ProblemService) AddSubmission(filePath string, participantId string, problemId string) {
+	_, fileName := filepath.Split(filePath)
+	submissionContent, err := os.ReadFile(filePath)
+	if err != nil {
+		print(err)
+		return
+	}
+
+	targetDir := filepath.Join("data", "participants", participantId, problemId)
+	print(filepath.Join(targetDir, fileName))
+	os.WriteFile(filepath.Join(targetDir, fileName), submissionContent, 0644)
 }

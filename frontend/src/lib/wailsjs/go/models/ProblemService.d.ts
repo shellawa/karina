@@ -3,6 +3,8 @@
 import {models} from '../models';
 import {context} from '../models';
 
+export function AddSubmission(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function GetProblems():Promise<Array<models.Problem>>;
 
 export function Initialize(arg1:context.Context):Promise<void>;

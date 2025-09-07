@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"os"
+	"path/filepath"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -26,14 +27,14 @@ func (s *ParticipantService) AddOneParticipant(p Participant, problemId string) 
 		return
 	}
 
-	db.Write("participants/"+p.Id, "profile", p)
-	os.MkdirAll("data/participants/"+p.Id+"/"+problemId+"/solves", 0755)
+	db.Write(filepath.Join("participants", p.Id), "profile", p)
+	os.MkdirAll(filepath.Join("data", "participants", p.Id, problemId, "solves"), 0755)
 	runtime.EventsEmit(s.ctx, "participant:change")
 }
 
 func (s *ParticipantService) GetParticipants() []Participant {
 	partipants := []Participant{}
-	entries, _ := os.ReadDir("data/participants")
+	entries, _ := os.ReadDir(filepath.Join("data", "participants"))
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -41,7 +42,7 @@ func (s *ParticipantService) GetParticipants() []Participant {
 		}
 
 		profile := Participant{}
-		db.Read("participants/"+entry.Name(), "profile", &profile)
+		db.Read(filepath.Join("participants", entry.Name()), "profile", &profile)
 		partipants = append(partipants, profile)
 	}
 

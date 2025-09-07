@@ -28,13 +28,13 @@ func (s *ProblemService) WriteProblem(p Problem) {
 	if len(p.Id) == 0 {
 		return
 	}
-	db.Write("problems/"+p.Id, "specs", p)
+	db.Write(filepath.Join("problems", p.Id), "specs", p)
 	runtime.EventsEmit(s.ctx, "problem:change", p.Id)
 }
 
 func (s *ProblemService) GetProblems() []Problem {
 	problems := []Problem{}
-	entries, _ := os.ReadDir("data/problems")
+	entries, _ := os.ReadDir(filepath.Join("data", "problems"))
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -42,7 +42,7 @@ func (s *ProblemService) GetProblems() []Problem {
 		}
 
 		specs := Problem{}
-		db.Read("problems/"+entry.Name(), "specs", &specs)
+		db.Read(filepath.Join("problems", entry.Name()), "specs", &specs)
 		problems = append(problems, specs)
 	}
 	return problems
@@ -57,6 +57,6 @@ func (s *ProblemService) AddSubmission(filePath string, participantId string, pr
 	}
 
 	targetDir := filepath.Join("data", "participants", participantId, problemId)
-	print(filepath.Join(targetDir, fileName))
+
 	os.WriteFile(filepath.Join(targetDir, fileName), submissionContent, 0644)
 }

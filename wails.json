@@ -3,7 +3,7 @@
   "name": "karina",
   "outputfilename": "karina",
   "frontend:install": "pnpm install",
-  "frontend:build": "pnpm build",
+  "frontend:build": "pnpm prebuild && pnpm build",
   "frontend:dev:watcher": "pnpm dev",
   "frontend:dev:serverUrl": "auto",
   "author": {

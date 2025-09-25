@@ -3,10 +3,10 @@
   import * as Dialog from "$lib/components/ui/dialog"
   import Input from "$lib/components/ui/input/input.svelte"
   import { Label } from "$lib/components/ui/label"
-  import { SelectFile } from "$lib/wailsjs/go/helpers/FileService"
+  import { SelectFile } from "$lib/wailsjs/go/helpers/Service"
   import { type models } from "$lib/wailsjs/go/models"
-  import { AddOneParticipant } from "$lib/wailsjs/go/models/ParticipantService"
-  import { AddSubmission } from "$lib/wailsjs/go/models/ProblemService"
+  import { AddOneParticipant } from "$lib/wailsjs/go/models/Service"
+  import { AddSubmission } from "$lib/wailsjs/go/models/Service"
   import { Plus } from "@lucide/svelte"
 
   let { participant, problemId }: { participant: models.Participant; problemId: string } = $props()

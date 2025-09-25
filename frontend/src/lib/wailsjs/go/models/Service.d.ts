@@ -5,6 +5,12 @@ import {context} from '../models';
 
 export function AddOneParticipant(arg1:models.Participant,arg2:string):Promise<void>;
 
+export function AddSubmission(arg1:string,arg2:string,arg3:string):Promise<void>;
+
 export function GetParticipants():Promise<Array<models.Participant>>;
 
+export function GetProblems():Promise<Array<models.Problem>>;
+
 export function Initialize(arg1:context.Context):Promise<void>;
+
+export function WriteProblem(arg1:models.Problem):Promise<void>;

@@ -17,9 +17,8 @@ var assets embed.FS
 
 func main() {
 	app := NewApp()
-	problemService := &models.ProblemService{}
-	participantService := &models.ParticipantService{}
-	fileService := &helpers.FileService{}
+	modelService := &models.Service{}
+	fileService := &helpers.Service{}
 
 	os.MkdirAll("data/problems", 0755)
 	os.MkdirAll("data/participants", 0755)
@@ -34,12 +33,11 @@ func main() {
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
-			problemService.Initialize(ctx)
-			participantService.Initialize(ctx)
+			modelService.Initialize(ctx)
 			fileService.Initialize(ctx)
 		},
 		Bind: []interface{}{
-			app, problemService, participantService, fileService,
+			app, modelService, fileService,
 		},
 	})
 

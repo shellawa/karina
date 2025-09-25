@@ -1,7 +1,6 @@
 package models
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 
@@ -14,15 +13,7 @@ type Participant struct {
 	Organization string `json:"organization"`
 }
 
-type ParticipantService struct {
-	ctx context.Context
-}
-
-func (s *ParticipantService) Initialize(ctx context.Context) {
-	s.ctx = ctx
-}
-
-func (s *ParticipantService) AddOneParticipant(p Participant, problemId string) {
+func (s *Service) AddOneParticipant(p Participant, problemId string) {
 	if len(p.Id) == 0 {
 		return
 	}
@@ -32,7 +23,7 @@ func (s *ParticipantService) AddOneParticipant(p Participant, problemId string) 
 	runtime.EventsEmit(s.ctx, "participant:change")
 }
 
-func (s *ParticipantService) GetParticipants() []Participant {
+func (s *Service) GetParticipants() []Participant {
 	partipants := []Participant{}
 	entries, _ := os.ReadDir(filepath.Join("data", "participants"))
 

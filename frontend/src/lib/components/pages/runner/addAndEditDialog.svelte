@@ -5,7 +5,7 @@
   import { Label } from "$lib/components/ui/label"
   import { Textarea } from "$lib/components/ui/textarea"
   import { type models } from "$lib/wailsjs/go/models"
-  import { WriteProblem } from "$lib/wailsjs/go/models/ProblemService"
+  import { WriteProblem } from "$lib/wailsjs/go/models/Service"
   import { Plus, Settings, Trash } from "@lucide/svelte"
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()

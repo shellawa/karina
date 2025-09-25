@@ -1,7 +1,6 @@
 package models
 
 import (
-	"context"
 	"os"
 	"path/filepath"
 
@@ -16,15 +15,7 @@ type Problem struct {
 	Memory      int    `json:"memory"`
 }
 
-type ProblemService struct {
-	ctx context.Context
-}
-
-func (s *ProblemService) Initialize(ctx context.Context) {
-	s.ctx = ctx
-}
-
-func (s *ProblemService) WriteProblem(p Problem) {
+func (s *Service) WriteProblem(p Problem) {
 	if len(p.Id) == 0 {
 		return
 	}
@@ -32,7 +23,7 @@ func (s *ProblemService) WriteProblem(p Problem) {
 	runtime.EventsEmit(s.ctx, "problem:change", p.Id)
 }
 
-func (s *ProblemService) GetProblems() []Problem {
+func (s *Service) GetProblems() []Problem {
 	problems := []Problem{}
 	entries, _ := os.ReadDir(filepath.Join("data", "problems"))
 
@@ -48,7 +39,7 @@ func (s *ProblemService) GetProblems() []Problem {
 	return problems
 }
 
-func (s *ProblemService) AddSubmission(filePath string, participantId string, problemId string) {
+func (s *Service) AddSubmission(filePath string, participantId string, problemId string) {
 	_, fileName := filepath.Split(filePath)
 	submissionContent, err := os.ReadFile(filePath)
 	if err != nil {

@@ -18,14 +18,14 @@ func (s *Service) AddOneParticipant(p Participant, problemId string) {
 		return
 	}
 
-	db.Write(filepath.Join("participants", p.Id), "profile", p)
-	os.MkdirAll(filepath.Join("data", "participants", p.Id, problemId, "submissions"), 0755)
+	db.Write(filepath.Join("problems", problemId, "participants", p.Id), "profile", p)
+	os.MkdirAll(filepath.Join("data", "problems", problemId, "participants", p.Id, "submissions"), 0755)
 	runtime.EventsEmit(s.ctx, "participant:change")
 }
 
-func (s *Service) GetParticipants() []Participant {
+func (s *Service) GetParticipants(problemId string) []Participant {
 	partipants := []Participant{}
-	entries, _ := os.ReadDir(filepath.Join("data", "participants"))
+	entries, _ := os.ReadDir(filepath.Join("data", "problems", problemId, "participants"))
 
 	for _, entry := range entries {
 		if !entry.IsDir() {
@@ -33,7 +33,7 @@ func (s *Service) GetParticipants() []Participant {
 		}
 
 		profile := Participant{}
-		db.Read(filepath.Join("participants", entry.Name()), "profile", &profile)
+		db.Read(filepath.Join("problems", problemId, "participants", entry.Name()), "profile", &profile)
 		partipants = append(partipants, profile)
 	}
 

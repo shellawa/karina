@@ -6,18 +6,19 @@
   import * as Select from "$lib/components/ui/select"
   import { GetParticipants } from "$lib/wailsjs/go/models/Service"
   import { GetProblems } from "$lib/wailsjs/go/models/Service"
-  import { RunSample } from "$lib/wailsjs/go/languages/Service"
+  import { RunAllParticipants } from "$lib/wailsjs/go/languages/Service"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
   import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
   import AddAndEditDialog from "./addAndEditDialog.svelte"
   import AddParticipantDialog from "./addParticipantDialog.svelte"
 
   let problems = $state(await GetProblems())
-  let participants = $state(await GetParticipants())
 
   // svelte-ignore state_referenced_locally
   let selectedProblemId = $state(problems[0]?.id ?? "")
   let selectedProblem = $derived(problems.find((x) => x.id == selectedProblemId))
+
+  let participantsPromise = $derived(GetParticipants(selectedProblemId))
 
   EventsOn("problem:change", async (id) => {
     problems = await GetProblems()
@@ -25,7 +26,7 @@
   })
 
   EventsOn("participant:change", async () => {
-    participants = await GetParticipants()
+    participantsPromise = GetParticipants(selectedProblemId)
   })
 
   EventsOn("run:python:sample", async (data) => {
@@ -68,7 +69,10 @@
           </div>
         </div>
 
-        <Button class="h-12 w-full" onclick={RunSample}>
+        <Button
+          class="h-12 w-full"
+          onclick={() => RunAllParticipants(selectedProblemId, 1500, 1024)}
+        >
           <Play /> Run all participants
         </Button>
         <div class="grid grid-cols-2 gap-2">
@@ -105,7 +109,7 @@
           <User class="h-5 w-5" />
           Leaderboard
         </div>
-        {#key participants}
+        {#key participantsPromise}
           <AddParticipantDialog
             participant={{ id: "", name: "", organization: "" }}
             problemId={selectedProblemId}
@@ -128,51 +132,53 @@
 
       <!-- table content -->
       <div class="space-y-2">
-        {#each participants as participant, index}
-          <div
-            class="grid-cols-22 grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
-          >
-            <!-- rank -->
-            <div class="col-span-2 flex items-center font-medium text-gray-600">#{index + 1}</div>
+        {#await participantsPromise then participants}
+          {#each participants as participant, index}
+            <div
+              class="grid-cols-22 grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
+            >
+              <!-- rank -->
+              <div class="col-span-2 flex items-center font-medium text-gray-600">#{index + 1}</div>
 
-            <!-- name and organization -->
-            <div class="col-span-6">
-              <div class="font-medium">{participant.name}</div>
-              <div class="text-xs text-gray-500">
-                {participant.id} &bull; {participant.organization}
+              <!-- name and organization -->
+              <div class="col-span-6">
+                <div class="font-medium">{participant.name}</div>
+                <div class="text-xs text-gray-500">
+                  {participant.id} &bull; {participant.organization}
+                </div>
+              </div>
+
+              <!-- language badge -->
+              <div class="col-span-4 flex items-center">
+                <Badge variant="outline">Python</Badge>
+              </div>
+
+              <!-- status badge and passed/total -->
+              <div class="col-span-4 flex items-center">
+                <div class="flex flex-col items-center">
+                  <Badge class="bg-green-400">Accepted</Badge>
+                  <div class="text-xs text-gray-500">10/10</div>
+                </div>
+              </div>
+
+              <!-- avg time and time range -->
+              <div class="col-span-3 flex items-center font-mono">
+                <div class="flex flex-col items-center">
+                  <div class="">123ms</div>
+                  <div class="text-xs text-gray-500">54-612</div>
+                </div>
+              </div>
+
+              <!-- avg memory and memory range -->
+              <div class="col-span-3 flex items-center font-mono">
+                <div class="flex flex-col items-center">
+                  <div class="">64MB</div>
+                  <div class="text-xs text-gray-500">21-727</div>
+                </div>
               </div>
             </div>
-
-            <!-- language badge -->
-            <div class="col-span-4 flex items-center">
-              <Badge variant="outline">Python</Badge>
-            </div>
-
-            <!-- status badge and passed/total -->
-            <div class="col-span-4 flex items-center">
-              <div class="flex flex-col items-center">
-                <Badge class="bg-green-400">Accepted</Badge>
-                <div class="text-xs text-gray-500">10/10</div>
-              </div>
-            </div>
-
-            <!-- avg time and time range -->
-            <div class="col-span-3 flex items-center font-mono">
-              <div class="flex flex-col items-center">
-                <div class="">123ms</div>
-                <div class="text-xs text-gray-500">54-612</div>
-              </div>
-            </div>
-
-            <!-- avg memory and memory range -->
-            <div class="col-span-3 flex items-center font-mono">
-              <div class="flex flex-col items-center">
-                <div class="">64MB</div>
-                <div class="text-xs text-gray-500">21-727</div>
-              </div>
-            </div>
-          </div>
-        {/each}
+          {/each}
+        {/await}
       </div>
     </Card.Content>
   </Card.Root>

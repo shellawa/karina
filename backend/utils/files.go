@@ -10,10 +10,27 @@ func CopyFile(sourcePath string, targetPath string, perm os.FileMode) {
 	os.WriteFile(targetPath, fileContent, perm)
 }
 
+func GetAllDirectories(dir string) []string {
+	dirs := []string{}
+
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return []string{}
+	}
+
+	for _, e := range entries {
+		if e.IsDir() {
+			dirs = append(dirs, e.Name())
+		}
+	}
+
+	return dirs
+}
+
 func GetLargestNumberedFolderName(dir string) int {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		panic(err)
+		return 0 // in case folder didn't exist, it probably means that it's the first one to be created
 	}
 
 	maxNum := 0

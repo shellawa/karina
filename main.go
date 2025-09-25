@@ -23,7 +23,6 @@ func main() {
 	languageService := &languages.Service{}
 
 	os.MkdirAll("data/problems", 0755)
-	os.MkdirAll("data/participants", 0755)
 
 	err := wails.Run(&options.App{
 		Title:  "karina",

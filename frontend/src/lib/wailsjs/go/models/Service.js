@@ -10,8 +10,8 @@ export function AddSubmission(arg1, arg2, arg3) {
   return window['go']['models']['Service']['AddSubmission'](arg1, arg2, arg3);
 }
 
-export function GetParticipants() {
-  return window['go']['models']['Service']['GetParticipants']();
+export function GetParticipants(arg1) {
+  return window['go']['models']['Service']['GetParticipants'](arg1);
 }
 
 export function GetProblems() {

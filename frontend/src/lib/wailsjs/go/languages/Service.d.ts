@@ -4,4 +4,4 @@ import {context} from '../models';
 
 export function Initialize(arg1:context.Context):Promise<void>;
 
-export function RunSample():Promise<void>;
+export function RunAllParticipants(arg1:string,arg2:number,arg3:number):Promise<void>;

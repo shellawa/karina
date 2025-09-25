@@ -22,6 +22,7 @@ func (s *Service) WriteProblem(p Problem) {
 		return
 	}
 	db.Write(filepath.Join("problems", p.Id), "specs", p)
+	os.MkdirAll(filepath.Join("data", "problems", p.Id, "participants"), 0755)
 	runtime.EventsEmit(s.ctx, "problem:change", p.Id)
 }
 
@@ -43,10 +44,12 @@ func (s *Service) GetProblems() []Problem {
 
 func (s *Service) AddSubmission(sourcePath string, participantId string, problemId string) {
 	_, fileName := filepath.Split(sourcePath)
-	submissionsDir := filepath.Join("data", "participants", participantId, problemId, "submissions")
-	currentSubmissionDir := filepath.Join(submissionsDir, strconv.Itoa(utils.GetLargestNumberedFolderName(submissionsDir)+1))
+	submissionsDir := filepath.Join("data", "problems", problemId, "participants", participantId, "submissions")
+	os.MkdirAll(submissionsDir, 0755)
 
+	currentSubmissionDir := filepath.Join(submissionsDir, strconv.Itoa(utils.GetLargestNumberedFolderName(submissionsDir)+1))
 	os.MkdirAll(currentSubmissionDir, 0755)
+
 	utils.CopyFile(
 		sourcePath,
 		filepath.Join(currentSubmissionDir, fileName),

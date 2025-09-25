@@ -19,7 +19,7 @@ func (s *Service) AddOneParticipant(p Participant, problemId string) {
 	}
 
 	db.Write(filepath.Join("participants", p.Id), "profile", p)
-	os.MkdirAll(filepath.Join("data", "participants", p.Id, problemId, "solves"), 0755)
+	os.MkdirAll(filepath.Join("data", "participants", p.Id, problemId, "submissions"), 0755)
 	runtime.EventsEmit(s.ctx, "participant:change")
 }
 

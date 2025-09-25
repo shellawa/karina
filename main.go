@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"karina/backend/helpers"
+	"karina/backend/languages"
 	"karina/backend/models"
 	"os"
 
@@ -19,6 +20,7 @@ func main() {
 	app := NewApp()
 	modelService := &models.Service{}
 	fileService := &helpers.Service{}
+	languageService := &languages.Service{}
 
 	os.MkdirAll("data/problems", 0755)
 	os.MkdirAll("data/participants", 0755)
@@ -35,9 +37,10 @@ func main() {
 			app.startup(ctx)
 			modelService.Initialize(ctx)
 			fileService.Initialize(ctx)
+			languageService.Initialize(ctx)
 		},
 		Bind: []interface{}{
-			app, modelService, fileService,
+			app, modelService, fileService, languageService,
 		},
 	})
 

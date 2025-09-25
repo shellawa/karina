@@ -1,8 +1,10 @@
 package models
 
 import (
+	"karina/backend/utils"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -39,15 +41,15 @@ func (s *Service) GetProblems() []Problem {
 	return problems
 }
 
-func (s *Service) AddSubmission(filePath string, participantId string, problemId string) {
-	_, fileName := filepath.Split(filePath)
-	submissionContent, err := os.ReadFile(filePath)
-	if err != nil {
-		print(err)
-		return
-	}
+func (s *Service) AddSubmission(sourcePath string, participantId string, problemId string) {
+	_, fileName := filepath.Split(sourcePath)
+	submissionsDir := filepath.Join("data", "participants", participantId, problemId, "submissions")
+	currentSubmissionDir := filepath.Join(submissionsDir, strconv.Itoa(utils.GetLargestNumberedFolderName(submissionsDir)+1))
 
-	targetDir := filepath.Join("data", "participants", participantId, problemId)
-
-	os.WriteFile(filepath.Join(targetDir, fileName), submissionContent, 0644)
+	os.MkdirAll(currentSubmissionDir, 0755)
+	utils.CopyFile(
+		sourcePath,
+		filepath.Join(currentSubmissionDir, fileName),
+		0644,
+	)
 }

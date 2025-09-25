@@ -6,6 +6,7 @@
   import * as Select from "$lib/components/ui/select"
   import { GetParticipants } from "$lib/wailsjs/go/models/Service"
   import { GetProblems } from "$lib/wailsjs/go/models/Service"
+  import { RunSample } from "$lib/wailsjs/go/languages/Service"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
   import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
   import AddAndEditDialog from "./addAndEditDialog.svelte"
@@ -25,6 +26,10 @@
 
   EventsOn("participant:change", async () => {
     participants = await GetParticipants()
+  })
+
+  EventsOn("run:python:sample", async (data) => {
+    console.log(data)
   })
 </script>
 
@@ -63,7 +68,7 @@
           </div>
         </div>
 
-        <Button class="h-12 w-full">
+        <Button class="h-12 w-full" onclick={RunSample}>
           <Play /> Run all participants
         </Button>
         <div class="grid grid-cols-2 gap-2">

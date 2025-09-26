@@ -9,6 +9,8 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type Service struct {
@@ -23,9 +25,21 @@ func (s *Service) Initialize(ctx context.Context) {
 	}
 }
 
+type SolveProgressUpdate struct {
+	ParticipantId string `json:"participantId"`
+	Language      string `json:"language"`
+	TestNo        int    `json:"testNo"`
+}
+
 func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 	modelsService := &models.Service{}
 	modelsService.Initialize(s.ctx)
+
+	runtime.EventsEmit(
+		s.ctx,
+		"solve:run_status",
+		"running",
+	)
 
 	participants := modelsService.GetParticipants(problemId)
 	for _, participant := range participants {
@@ -43,7 +57,7 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 
 		tests := modelsService.GetTestCases(problemId)
 
-		for _, test := range tests {
+		for i, test := range tests {
 			testDir := filepath.Join(solveDir, test.Id)
 			os.MkdirAll(testDir, 0755)
 
@@ -53,6 +67,15 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 				filepath.Join(submissionDir, problemId+".inp"),
 				0644,
 			)
+
+			runtime.EventsEmit(
+				s.ctx,
+				"solve:test_run_start",
+				SolveProgressUpdate{
+					ParticipantId: participant.Id,
+					Language:      "Python",
+					TestNo:        i + 1,
+				})
 
 			testSolveResult := s.runners["python"].Run(common.TestRunData{
 				ProblemId:  problemId,
@@ -84,7 +107,18 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 			// remove inp and out file of the test to prepare for the next one
 			os.Remove(filepath.Join(submissionDir, problemId+".inp"))
 			os.Remove(filepath.Join(submissionDir, problemId+".out"))
+
+			runtime.EventsEmit(
+				s.ctx,
+				"solve:test_run_finish",
+			)
 		}
 
 	}
+	runtime.EventsEmit(
+		s.ctx,
+		"solve:run_status",
+		"finished",
+	)
+
 }

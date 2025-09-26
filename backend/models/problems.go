@@ -1,6 +1,7 @@
 package models
 
 import (
+	"karina/backend/languages/common"
 	"karina/backend/utils"
 	"os"
 	"path/filepath"
@@ -21,6 +22,11 @@ type TestCase struct {
 	Id     string
 	Input  string
 	Output string
+}
+
+type ParticipantSolveResult struct {
+	Id      string                   `json:"id"`
+	Results []common.TestSolveResult `json:"results"`
 }
 
 func (s *Service) WriteProblem(p Problem) {
@@ -104,4 +110,38 @@ func (s *Service) GetTestCases(problemId string) []TestCase {
 	}
 
 	return testCases
+}
+
+// wouldn't recalling this everytime a new test is judge very costly?
+func (s *Service) GetSolveResults(problemId string) []ParticipantSolveResult {
+	participantSolveResults := []ParticipantSolveResult{}
+
+	participants := s.GetParticipants(problemId)
+	for _, participant := range participants {
+		// sorting out ids and dirs
+		problemDir := filepath.Join("data", "problems", problemId)
+		participantDir := filepath.Join(problemDir, "participants", participant.Id)
+
+		submissionId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions")))
+		solveId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions", submissionId, "solves")))
+
+		submissionDir := filepath.Join(participantDir, "submissions", submissionId)
+		solveDir := filepath.Join(submissionDir, "solves", solveId)
+
+		tests := s.GetTestCases(problemId)
+		testSolveResults := []common.TestSolveResult{}
+
+		for _, test := range tests {
+			testDir := filepath.Join(solveDir, test.Id)
+			testSolveResult := common.TestSolveResult{}
+			DB.Read(testDir, "result", &testSolveResult)
+			testSolveResults = append(testSolveResults, testSolveResult)
+		}
+
+		participantSolveResults = append(
+			participantSolveResults,
+			ParticipantSolveResult{Id: participant.Id, Results: testSolveResults})
+	}
+
+	return participantSolveResults
 }

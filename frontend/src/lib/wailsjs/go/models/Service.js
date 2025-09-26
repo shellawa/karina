@@ -18,6 +18,10 @@ export function GetProblems() {
   return window['go']['models']['Service']['GetProblems']();
 }
 
+export function GetSolveResults(arg1) {
+  return window['go']['models']['Service']['GetSolveResults'](arg1);
+}
+
 export function GetTestCases(arg1) {
   return window['go']['models']['Service']['GetTestCases'](arg1);
 }

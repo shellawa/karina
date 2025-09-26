@@ -11,6 +11,8 @@ export function GetParticipants(arg1:string):Promise<Array<models.Participant>>;
 
 export function GetProblems():Promise<Array<models.Problem>>;
 
+export function GetSolveResults(arg1:string):Promise<Array<models.ParticipantSolveResult>>;
+
 export function GetTestCases(arg1:string):Promise<Array<models.TestCase>>;
 
 export function Initialize(arg1:context.Context):Promise<void>;

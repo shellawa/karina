@@ -1,9 +1,23 @@
+export namespace common {
+	
+	export interface TestSolveResult {
+	    verdict: string;
+	    time: number;
+	    memory: number;
+	}
+
+}
+
 export namespace models {
 	
 	export interface Participant {
 	    id: string;
 	    name: string;
 	    organization: string;
+	}
+	export interface ParticipantSolveResult {
+	    id: string;
+	    results: common.TestSolveResult[];
 	}
 	export interface Problem {
 	    id: string;

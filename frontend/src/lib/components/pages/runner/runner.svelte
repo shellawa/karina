@@ -4,8 +4,7 @@
   import * as Card from "$lib/components/ui/card"
   import { Label } from "$lib/components/ui/label"
   import * as Select from "$lib/components/ui/select"
-  import { GetParticipants } from "$lib/wailsjs/go/models/Service"
-  import { GetProblems } from "$lib/wailsjs/go/models/Service"
+  import { GetProblems, GetParticipants, GetTestCases } from "$lib/wailsjs/go/models/Service"
   import { RunAllParticipants } from "$lib/wailsjs/go/languages/Service"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
   import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
@@ -65,7 +64,9 @@
             {selectedProblem?.description}
           </div>
           <div class="line-clamp-4 text-xs text-gray-500">
-            {Math.floor(Math.random() * 10)} test cases
+            {#await GetTestCases(selectedProblemId) then testCases}
+              {testCases.length}
+            {/await} test case(s)
           </div>
         </div>
 

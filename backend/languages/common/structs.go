@@ -1,9 +1,9 @@
 package common
 
-type TestSolveVerdict struct {
-	Verdict string
-	Time    int64
-	Memory  int
+type TestSolveResult struct {
+	Verdict string `json:"verdict"`
+	Time    int64  `json:"time"`
+	Memory  int    `json:"memory"`
 }
 
 type TestRunData struct {
@@ -11,9 +11,11 @@ type TestRunData struct {
 	WorkingDir string
 	MaxTime    int
 	MaxMemory  int
+	TestInput  string
+	TestOutput string
 }
 
 type Runner interface {
 	Name() string
-	Run(d TestRunData) TestSolveVerdict
+	Run(d TestRunData) TestSolveResult
 }

@@ -1,7 +1,7 @@
 package python
 
 import (
-	"fmt"
+	"context"
 	"karina/backend/languages/common"
 	"os"
 	"os/exec"
@@ -15,23 +15,34 @@ func (p *Runner) Name() string {
 	return "python"
 }
 
-func (p *Runner) Run(d common.TestRunData) common.TestSolveVerdict {
+func (p *Runner) Run(d common.TestRunData) common.TestSolveResult {
 	cwd, _ := os.Getwd()
-
 	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "python.exe")
-	cmd := exec.Command(pythonRuntime, d.ProblemId+".py")
+	verdict := "AC"
+
+	// context to interrupt process with time limit
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(d.MaxTime))
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, pythonRuntime, d.ProblemId+".py")
 	cmd.Dir = d.WorkingDir
 
 	startTime := time.Now()
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		print(err)
-	}
-	takenTime := time.Since(startTime).Milliseconds()
-	fmt.Printf("%s\n", stdoutStderr)
+	takenTime := int64(d.MaxTime)
 
-	return common.TestSolveVerdict{
-		Verdict: "AC",
+	_, err := cmd.CombinedOutput()
+	if err != nil {
+		if ctx.Err() == context.DeadlineExceeded {
+			verdict = "TLE"
+		} else {
+			verdict = "Other"
+		}
+	} else {
+		takenTime = time.Since(startTime).Milliseconds()
+	}
+
+	return common.TestSolveResult{
+		Verdict: verdict,
 		Time:    takenTime,
 		Memory:  456,
 	}

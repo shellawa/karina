@@ -29,38 +29,48 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 
 	participants := modelsService.GetParticipants(problemId)
 	for _, participant := range participants {
-		cwd, _ := os.Getwd()
 
 		// sorting out ids and dirs
-		problemDir := filepath.Join(cwd, "data", "problems", problemId)
+		problemDir := filepath.Join("data", "problems", problemId)
 		participantDir := filepath.Join(problemDir, "participants", participant.Id)
 
 		submissionId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions")))
-		solveId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions", submissionId, "solves")) + 1)
+		solveId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions", submissionId, "solves")) + 1) // this is the next solve
 
 		submissionDir := filepath.Join(participantDir, "submissions", submissionId)
 		solveDir := filepath.Join(submissionDir, "solves", solveId)
 		os.MkdirAll(solveDir, 0755)
 
-		testIds := utils.GetAllDirectories(filepath.Join(problemDir, "tests"))
+		tests := modelsService.GetTestCases(problemId)
 
-		for _, testId := range testIds {
-			testDir := filepath.Join(solveDir, testId)
+		for _, test := range tests {
+			testDir := filepath.Join(solveDir, test.Id)
 			os.MkdirAll(testDir, 0755)
 
 			// copy inp file to submission folder (working folder)
 			utils.CopyFile(
-				filepath.Join(problemDir, "tests", testId, problemId+".inp"),
+				filepath.Join(problemDir, "tests", test.Id, problemId+".inp"),
 				filepath.Join(submissionDir, problemId+".inp"),
 				0644,
 			)
 
-			s.runners["python"].Run(common.TestRunData{
+			testSolveResult := s.runners["python"].Run(common.TestRunData{
 				ProblemId:  problemId,
 				WorkingDir: submissionDir,
 				MaxTime:    time,
 				MaxMemory:  memory,
+				TestInput:  test.Input,
+				TestOutput: test.Output,
 			})
+
+			// compare the outputs
+			if testSolveResult.Verdict == "AC" {
+				solveOutputBytes, _ := os.ReadFile(filepath.Join(submissionDir, problemId+".out"))
+				solveOutput := string(solveOutputBytes)
+				if !utils.CompareOutputs(test.Output, solveOutput) {
+					testSolveResult.Verdict = "WA"
+				}
+			}
 
 			// copy out file to the solve's test folder
 			utils.CopyFile(
@@ -68,6 +78,8 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 				filepath.Join(testDir, problemId+".out"),
 				0644,
 			)
+
+			models.DB.Write(testDir, "result", testSolveResult)
 
 			// remove inp and out file of the test to prepare for the next one
 			os.Remove(filepath.Join(submissionDir, problemId+".inp"))

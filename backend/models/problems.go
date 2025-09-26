@@ -17,11 +17,17 @@ type Problem struct {
 	Memory      int    `json:"memory"`
 }
 
+type TestCase struct {
+	Id     string
+	Input  string
+	Output string
+}
+
 func (s *Service) WriteProblem(p Problem) {
 	if len(p.Id) == 0 {
 		return
 	}
-	db.Write(filepath.Join("problems", p.Id), "specs", p)
+	DB.Write(filepath.Join("data", "problems", p.Id), "specs", p)
 	os.MkdirAll(filepath.Join("data", "problems", p.Id, "participants"), 0755)
 	runtime.EventsEmit(s.ctx, "problem:change", p.Id)
 }
@@ -36,7 +42,7 @@ func (s *Service) GetProblems() []Problem {
 		}
 
 		specs := Problem{}
-		db.Read(filepath.Join("problems", entry.Name()), "specs", &specs)
+		DB.Read(filepath.Join("data", "problems", entry.Name()), "specs", &specs)
 		problems = append(problems, specs)
 	}
 	return problems
@@ -55,4 +61,47 @@ func (s *Service) AddSubmission(sourcePath string, participantId string, problem
 		filepath.Join(currentSubmissionDir, fileName),
 		0644,
 	)
+}
+
+func (s *Service) GetTestCases(problemId string) []TestCase {
+	testCases := []TestCase{}
+
+	testsDirPath := filepath.Join("data", "problems", problemId, "tests")
+	testNames := utils.GetAllDirectories(testsDirPath)
+
+	for _, testName := range testNames {
+		testPath := filepath.Join(testsDirPath, testName)
+
+		testInput := ""
+		testOutput := ""
+		entries, _ := os.ReadDir(testPath)
+
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+
+			if e.Name() == problemId+".inp" {
+				testInputByte, _ := os.ReadFile(filepath.Join(testPath, problemId+".inp"))
+				testInput = string(testInputByte)
+			}
+
+			if e.Name() == problemId+".out" {
+				testOutputByte, _ := os.ReadFile(filepath.Join(testPath, problemId+".out"))
+				testOutput = string(testOutputByte)
+			}
+		}
+
+		if testInput == "" || testOutput == "" {
+			continue
+		}
+
+		testCases = append(testCases, TestCase{
+			Id:     testName,
+			Input:  testInput,
+			Output: testOutput,
+		})
+	}
+
+	return testCases
 }

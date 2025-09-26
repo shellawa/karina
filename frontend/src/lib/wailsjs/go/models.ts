@@ -12,6 +12,11 @@ export namespace models {
 	    time: number;
 	    memory: number;
 	}
+	export interface TestCase {
+	    Id: string;
+	    Input: string;
+	    Output: string;
+	}
 
 }
 

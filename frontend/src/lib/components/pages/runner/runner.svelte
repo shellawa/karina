@@ -1,30 +1,36 @@
-<script module lang="ts">
-  import { Badge } from "$lib/components/ui/badge"
-  import { Button } from "$lib/components/ui/button"
-  import * as Card from "$lib/components/ui/card"
-  import { Label } from "$lib/components/ui/label"
-  import * as Select from "$lib/components/ui/select"
+<script lang="ts">
+  import { onMount } from "svelte"
+  import { flip } from "svelte/animate"
+  import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
+  import { EventsOn } from "$lib/wailsjs/runtime/runtime"
+  import { RunAllParticipants } from "$lib/wailsjs/go/languages/Service"
   import {
     GetProblems,
     GetParticipants,
     GetTestCases,
     GetSolveResults
   } from "$lib/wailsjs/go/models/Service"
-  import { RunAllParticipants } from "$lib/wailsjs/go/languages/Service"
-  import { EventsOn } from "$lib/wailsjs/runtime/runtime"
-  import { ChartBar, Code, Download, Play, User } from "@lucide/svelte"
+  import type { models } from "$lib/wailsjs/go/models"
+  import { Badge } from "$lib/components/ui/badge"
+  import { Button } from "$lib/components/ui/button"
+  import * as Card from "$lib/components/ui/card"
+  import { Label } from "$lib/components/ui/label"
+  import * as Select from "$lib/components/ui/select"
+  import Progress from "$lib/components/ui/progress/progress.svelte"
   import AddAndEditDialog from "./addAndEditDialog.svelte"
   import AddParticipantDialog from "./addParticipantDialog.svelte"
-  import Progress from "$lib/components/ui/progress/progress.svelte"
-  import { flip } from "svelte/animate"
-  import type { models } from "$lib/wailsjs/go/models"
 
-  let problems = $state(await GetProblems())
+  let problems = $state<models.Problem[]>([])
 
-  // svelte-ignore state_referenced_locally
-  let selectedProblemId = $state(problems[0]?.id ?? "")
-  let selectedProblem = $derived(problems.find((x) => x.id == selectedProblemId))
+  onMount(async () => {
+    problems = await GetProblems()
+    if (problems.length > 0) {
+      selectedProblemId = problems[0].id
+    }
+  })
 
+  let selectedProblemId = $state("")
+  let selectedProblem = $derived(problems.find((x) => x.id === selectedProblemId))
   let participantsPromise = $derived(GetParticipants(selectedProblemId))
 
   EventsOn("problem:change", async (id) => {
@@ -49,7 +55,6 @@
     solveStatus = status
   })
 
-  // svelte-ignore state_referenced_locally
   let solveResults = $state([]) as models.ParticipantSolveResult[]
   EventsOn("solve:test_run_start", async (solveStatusUpdate) => {
     solveProgress = solveStatusUpdate

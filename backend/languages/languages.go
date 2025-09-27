@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -31,9 +32,26 @@ type SolveProgressUpdate struct {
 	TestNo        int    `json:"testNo"`
 }
 
-func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
+type SolveContext struct {
+	ParticipantId string
+	SubmissionId  string
+	SolveId       string
+	SubmissionDir string
+	SolveDir      string
+	Tests         []TestContext
+}
+
+type TestContext struct {
+	Id     string
+	Dir    string
+	Input  string
+	Output string
+}
+
+func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory int) {
 	modelsService := &models.Service{}
 	modelsService.Initialize(s.ctx)
+	participants := modelsService.GetParticipants(problemId)
 
 	runtime.EventsEmit(
 		s.ctx,
@@ -41,30 +59,60 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 		"running",
 	)
 
-	participants := modelsService.GetParticipants(problemId)
-	for _, participant := range participants {
+	var solves []SolveContext
 
-		// sorting out ids and dirs
-		problemDir := filepath.Join("data", "problems", problemId)
+	problemDir := filepath.Join("data", "problems", problemId)
+
+	for _, participant := range participants {
 		participantDir := filepath.Join(problemDir, "participants", participant.Id)
 
-		submissionId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions")))
-		solveId := strconv.Itoa(utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions", submissionId, "solves")) + 1) // this is the next solve
+		submissionId := strconv.Itoa(
+			utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions")),
+		)
+		solveId := strconv.Itoa(
+			utils.GetLargestNumberedFolderName(filepath.Join(participantDir, "submissions", submissionId, "solves")) + 1,
+		)
 
 		submissionDir := filepath.Join(participantDir, "submissions", submissionId)
 		solveDir := filepath.Join(submissionDir, "solves", solveId)
 		os.MkdirAll(solveDir, 0755)
 
 		tests := modelsService.GetTestCases(problemId)
-
-		for i, test := range tests {
-			testDir := filepath.Join(solveDir, test.Id)
+		testContexts := []TestContext{}
+		for _, testCase := range tests {
+			testDir := filepath.Join(solveDir, testCase.Id)
 			os.MkdirAll(testDir, 0755)
+			testContexts = append(testContexts, TestContext{
+				Id:     testCase.Id,
+				Dir:    testDir,
+				Input:  testCase.Input,
+				Output: testCase.Output,
+			})
+		}
 
+		solves = append(solves, SolveContext{
+			ParticipantId: participant.Id,
+			SubmissionId:  submissionId,
+			SolveId:       solveId,
+			SubmissionDir: submissionDir,
+			SolveDir:      solveDir,
+			Tests:         testContexts,
+		})
+	}
+
+	runtime.EventsEmit(
+		s.ctx,
+		"solve:test_run_finish",
+	)
+
+	time.Sleep(time.Millisecond * 700)
+
+	for _, solve := range solves {
+		for i, test := range solve.Tests {
 			// copy inp file to submission folder (working folder)
 			utils.CopyFile(
 				filepath.Join(problemDir, "tests", test.Id, problemId+".inp"),
-				filepath.Join(submissionDir, problemId+".inp"),
+				filepath.Join(solve.SubmissionDir, problemId+".inp"),
 				0644,
 			)
 
@@ -72,23 +120,23 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 				s.ctx,
 				"solve:test_run_start",
 				SolveProgressUpdate{
-					ParticipantId: participant.Id,
+					ParticipantId: solve.ParticipantId,
 					Language:      "Python",
 					TestNo:        i + 1,
 				})
 
 			testSolveResult := s.runners["python"].Run(common.TestRunData{
 				ProblemId:  problemId,
-				WorkingDir: submissionDir,
-				MaxTime:    time,
-				MaxMemory:  memory,
+				WorkingDir: solve.SubmissionDir,
+				MaxTime:    maxTime,
+				MaxMemory:  maxMemory,
 				TestInput:  test.Input,
 				TestOutput: test.Output,
 			})
 
 			// compare the outputs
 			if testSolveResult.Verdict == "AC" {
-				solveOutputBytes, _ := os.ReadFile(filepath.Join(submissionDir, problemId+".out"))
+				solveOutputBytes, _ := os.ReadFile(filepath.Join(solve.SubmissionDir, problemId+".out"))
 				solveOutput := string(solveOutputBytes)
 				if !utils.CompareOutputs(test.Output, solveOutput) {
 					testSolveResult.Verdict = "WA"
@@ -97,16 +145,16 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 
 			// copy out file to the solve's test folder
 			utils.CopyFile(
-				filepath.Join(submissionDir, problemId+".out"),
-				filepath.Join(testDir, problemId+".out"),
+				filepath.Join(solve.SubmissionDir, problemId+".out"),
+				filepath.Join(test.Dir, problemId+".out"),
 				0644,
 			)
 
-			models.DB.Write(testDir, "result", testSolveResult)
+			models.DB.Write(test.Dir, "result", testSolveResult)
 
 			// remove inp and out file of the test to prepare for the next one
-			os.Remove(filepath.Join(submissionDir, problemId+".inp"))
-			os.Remove(filepath.Join(submissionDir, problemId+".out"))
+			os.Remove(filepath.Join(solve.SubmissionDir, problemId+".inp"))
+			os.Remove(filepath.Join(solve.SubmissionDir, problemId+".out"))
 
 			runtime.EventsEmit(
 				s.ctx,
@@ -114,7 +162,9 @@ func (s *Service) RunAllParticipants(problemId string, time int, memory int) {
 			)
 		}
 
+		time.Sleep(time.Millisecond * 700)
 	}
+
 	runtime.EventsEmit(
 		s.ctx,
 		"solve:run_status",

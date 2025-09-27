@@ -235,7 +235,7 @@
             }) as ptcp, index (ptcp.id)}
             <div
               animate:flip
-              class="grid-cols-22 grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
+              class="grid-cols-22 bg-card grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
             >
               <!-- rank -->
               <div class="col-span-2 flex items-center font-medium text-gray-600">#{index + 1}</div>

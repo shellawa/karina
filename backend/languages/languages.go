@@ -105,7 +105,8 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 		"solve:test_run_finish",
 	)
 
-	time.Sleep(time.Millisecond * 700)
+	// wait for the frontend to re-sort
+	time.Sleep(time.Millisecond * 1000)
 
 	for _, solve := range solves {
 		for i, test := range solve.Tests {
@@ -162,7 +163,7 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 			)
 		}
 
-		time.Sleep(time.Millisecond * 700)
+		time.Sleep(time.Millisecond * 300)
 	}
 
 	runtime.EventsEmit(

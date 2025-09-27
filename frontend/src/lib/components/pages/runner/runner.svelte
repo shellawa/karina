@@ -105,7 +105,7 @@
 
         <Button
           class="h-12 w-full"
-          onclick={() => RunAllParticipants(selectedProblemId, 1500, 1024)}
+          onclick={() => RunAllParticipants(selectedProblemId, selectedProblem?.time ?? 1500, 1024)}
         >
           <Play /> Run all participants
         </Button>
@@ -234,7 +234,7 @@
               return a.totalMemory - b.totalMemory
             }) as ptcp, index (ptcp.id)}
             <div
-              animate:flip
+              animate:flip={{ duration: 400 }}
               class="grid-cols-22 bg-card grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
             >
               <!-- rank -->

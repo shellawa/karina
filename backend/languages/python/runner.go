@@ -17,7 +17,7 @@ func (p *Runner) Name() string {
 
 func (p *Runner) Run(d common.TestRunData) common.TestSolveResult {
 	cwd, _ := os.Getwd()
-	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "python.exe")
+	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")
 	verdict := "AC"
 
 	// context to interrupt process with time limit

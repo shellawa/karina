@@ -7,6 +7,8 @@ export function AddOneParticipant(arg1:models.Participant,arg2:string):Promise<v
 
 export function AddSubmission(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function GetGeneratorScript(arg1:string):Promise<string>;
+
 export function GetParticipants(arg1:string):Promise<Array<models.Participant>>;
 
 export function GetProblems():Promise<Array<models.Problem>>;
@@ -16,5 +18,7 @@ export function GetSolveResults(arg1:string):Promise<Array<models.ParticipantSol
 export function GetTestCases(arg1:string):Promise<Array<models.TestCase>>;
 
 export function Initialize(arg1:context.Context):Promise<void>;
+
+export function WriteGeneratorScript(arg1:string,arg2:string):Promise<void>;
 
 export function WriteProblem(arg1:models.Problem):Promise<void>;

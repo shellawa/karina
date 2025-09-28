@@ -10,6 +10,10 @@ export function AddSubmission(arg1, arg2, arg3) {
   return window['go']['models']['Service']['AddSubmission'](arg1, arg2, arg3);
 }
 
+export function GetGeneratorScript(arg1) {
+  return window['go']['models']['Service']['GetGeneratorScript'](arg1);
+}
+
 export function GetParticipants(arg1) {
   return window['go']['models']['Service']['GetParticipants'](arg1);
 }
@@ -28,6 +32,10 @@ export function GetTestCases(arg1) {
 
 export function Initialize(arg1) {
   return window['go']['models']['Service']['Initialize'](arg1);
+}
+
+export function WriteGeneratorScript(arg1, arg2) {
+  return window['go']['models']['Service']['WriteGeneratorScript'](arg1, arg2);
 }
 
 export function WriteProblem(arg1) {

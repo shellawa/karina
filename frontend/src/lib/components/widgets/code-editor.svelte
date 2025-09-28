@@ -43,10 +43,10 @@
     }
   })
 
-  onDestroy(() => {
-    monaco.editor.getModels().forEach((m) => m.dispose())
-    editor.dispose()
-  })
+  // onDestroy(() => {
+  //   monaco.editor.getModels().forEach((m) => m.dispose())
+  //   editor.dispose()
+  // })
 </script>
 
 <div class="container h-[400px] rounded-lg border px-1.5" bind:this={editorContainer}></div>

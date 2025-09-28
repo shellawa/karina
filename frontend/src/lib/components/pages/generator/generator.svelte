@@ -3,7 +3,12 @@
   import { FileText, FlaskConical, Trash2 } from "@lucide/svelte"
   import { EventsOn } from "$lib/wailsjs/runtime/runtime"
   import { SelectFile } from "$lib/wailsjs/go/helpers/Service"
-  import { GetProblems, GetTestCases } from "$lib/wailsjs/go/models/Service"
+  import {
+    GetProblems,
+    GetTestCases,
+    WriteGeneratorScript,
+    GetGeneratorScript
+  } from "$lib/wailsjs/go/models/Service"
   import { type models } from "$lib/wailsjs/go/models"
   import { Button } from "$lib/components/ui/button"
   import * as Card from "$lib/components/ui/card"
@@ -25,17 +30,26 @@
   let testCases = $derived(GetTestCases(selectedProblemId))
 
   let generatorScript = $state("")
+  $inspect(generatorScript)
+
+  $effect(() => {
+    if (selectedProblemId && generatorScript) {
+      WriteGeneratorScript(selectedProblemId, generatorScript)
+    }
+  })
 
   onMount(async () => {
     problems = await GetProblems()
     if (problems.length > 0) {
       selectedProblemId = problems[0].id
+      generatorScript = await GetGeneratorScript(selectedProblemId)
     }
   })
 
   EventsOn("problem:change", async (id) => {
     problems = await GetProblems()
     selectedProblemId = id
+    generatorScript = await GetGeneratorScript(selectedProblemId)
   })
 </script>
 
@@ -53,7 +67,11 @@
         <div class="space-y-3">
           <div>
             <Label class="mb-2">Select problem</Label>
-            <Select.Root type="single" bind:value={selectedProblemId}>
+            <Select.Root
+              type="single"
+              bind:value={selectedProblemId}
+              onValueChange={async (id) => (generatorScript = await GetGeneratorScript(id))}
+            >
               <Select.Trigger>
                 {selectedProblem?.label}
               </Select.Trigger>
@@ -67,7 +85,11 @@
           </div>
 
           <Label class="mb-2">Generator script</Label>
-          <CodeEditor language="python" theme="vs" bind:value={generatorScript} />
+
+          {#key selectedProblemId}
+            <CodeEditor language="python" theme="vs" bind:value={generatorScript} />
+          {/key}
+
           <div class="grid grid-cols-2">
             <div>
               <Label class="mb-2">Solution (for generating output)</Label>

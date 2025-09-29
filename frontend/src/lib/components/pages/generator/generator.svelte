@@ -34,7 +34,7 @@
   $inspect(generatorScript)
 
   $effect(() => {
-    if (selectedProblemId && generatorScript) {
+    if (selectedProblemId) {
       WriteGeneratorScript(selectedProblemId, generatorScript)
     }
   })

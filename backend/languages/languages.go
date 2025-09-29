@@ -179,11 +179,9 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 	)
 }
 
+// only support python with stdio for now
 func (s *Service) GenerateTests(problemId string, testNum int) {
 	generatorDir := filepath.Join("data", "problems", problemId, "generator")
-	// scriptPath := filepath.Join(generatorDir, "generate.py")
-
-	// solutionPath := filepath.Join(generatorDir, "solution.py")
 
 	cwd, _ := os.Getwd()
 	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")

@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (p *Runner) Run(d common.TestRunData) common.TestSolveResult {
+func (p *Python) Run(_ context.Context, d common.TestRunData) common.TestSolveResult {
 	cwd, _ := os.Getwd()
 	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")
 

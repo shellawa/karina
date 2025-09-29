@@ -7,7 +7,8 @@
     GetProblems,
     GetTestCases,
     WriteGeneratorScript,
-    GetGeneratorScript
+    GetGeneratorScript,
+    WriteSolution
   } from "$lib/wailsjs/go/models/Service"
   import { type models } from "$lib/wailsjs/go/models"
   import { Button } from "$lib/components/ui/button"
@@ -23,15 +24,22 @@
   async function selectSolutionFile() {
     const path = await SelectFile()
     filePath = path
+    await WriteSolution(selectedProblemId, path)
   }
+
+  let testsNum = $state(1)
 
   let problems = $state<models.Problem[]>([])
   let selectedProblemId = $state("")
   let selectedProblem = $derived(problems.find((x) => x.id === selectedProblemId))
-  let testCases = $derived(GetTestCases(selectedProblemId))
+
+  let dummy = $state(0)
+  let testCases = $derived.by(async () => {
+    const aaa = dummy
+    return await GetTestCases(selectedProblemId)
+  })
 
   let generatorScript = $state("")
-  $inspect(generatorScript)
 
   $effect(() => {
     if (selectedProblemId) {
@@ -51,6 +59,10 @@
     problems = await GetProblems()
     selectedProblemId = id
     generatorScript = await GetGeneratorScript(selectedProblemId)
+  })
+
+  EventsOn("generate:test_generated", () => {
+    dummy++
   })
 </script>
 
@@ -100,13 +112,16 @@
             </div>
             <div>
               <Label class="mb-2">Number of test(s) to generate</Label>
-              <Input type="number" />
+              <Input type="number" bind:value={testsNum} />
             </div>
           </div>
         </div>
       </Card.Content>
       <Card.Footer>
-        <Button class="ml-auto" onclick={async () => await GenerateTests(selectedProblemId, 1)}>
+        <Button
+          class="ml-auto"
+          onclick={async () => await GenerateTests(selectedProblemId, testsNum)}
+        >
           Generate
         </Button>
       </Card.Footer>

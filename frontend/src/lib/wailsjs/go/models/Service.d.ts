@@ -22,3 +22,5 @@ export function Initialize(arg1:context.Context):Promise<void>;
 export function WriteGeneratorScript(arg1:string,arg2:string):Promise<void>;
 
 export function WriteProblem(arg1:models.Problem):Promise<void>;
+
+export function WriteSolution(arg1:string,arg2:string):Promise<void>;

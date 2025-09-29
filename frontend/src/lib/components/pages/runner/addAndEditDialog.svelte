@@ -11,8 +11,6 @@
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
   let fieldProblem = $state(JSON.parse(JSON.stringify(problem ?? {}))) as models.Problem
-
-  $inspect(fieldProblem)
 </script>
 
 <Dialog.Root>

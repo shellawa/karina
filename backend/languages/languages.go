@@ -7,7 +7,6 @@ import (
 	"karina/backend/models"
 	"karina/backend/utils"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -16,14 +15,14 @@ import (
 )
 
 type Service struct {
-	ctx     context.Context
-	runners map[string]common.Runner
+	ctx       context.Context
+	languages map[string]common.Language
 }
 
 func (s *Service) Initialize(ctx context.Context) {
 	s.ctx = ctx
-	s.runners = map[string]common.Runner{
-		"python": &python.Runner{},
+	s.languages = map[string]common.Language{
+		"python": &python.Python{},
 	}
 }
 
@@ -137,7 +136,7 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 				IOMode:     IOMode,
 			}
 
-			testSolveResult := s.runners["python"].Run(runData)
+			testSolveResult := s.languages["python"].Run(s.ctx, runData)
 
 			// compare the outputs
 			if !utils.CompareOutputs(test.Output, testSolveResult.TestRunOutput) {
@@ -179,18 +178,6 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 	)
 }
 
-// only support python with stdio for now
 func (s *Service) GenerateTests(problemId string, testNum int) {
-	generatorDir := filepath.Join("data", "problems", problemId, "generator")
-
-	cwd, _ := os.Getwd()
-	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")
-
-	cmd := exec.Command(pythonRuntime, "generate.py")
-	cmd.Dir = generatorDir
-
-	for i := 0; i < testNum; i++ {
-		stdoutStderr, _ := cmd.CombinedOutput()
-		os.WriteFile(filepath.Join(generatorDir, problemId+".inp"), stdoutStderr, 0644)
-	}
+	s.languages["python"].Generate(s.ctx, problemId, testNum)
 }

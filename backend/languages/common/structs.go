@@ -1,5 +1,7 @@
 package common
 
+import "context"
+
 type TestSolveResult struct {
 	Verdict       string `json:"verdict"`
 	Time          int64  `json:"time"`
@@ -17,7 +19,8 @@ type TestRunData struct {
 	IOMode     int
 }
 
-type Runner interface {
+type Language interface {
 	Name() string
-	Run(d TestRunData) TestSolveResult
+	Run(ctx context.Context, d TestRunData) TestSolveResult
+	Generate(ctx context.Context, problemId string, testNum int)
 }

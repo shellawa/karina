@@ -41,3 +41,7 @@ export function WriteGeneratorScript(arg1, arg2) {
 export function WriteProblem(arg1) {
   return window['go']['models']['Service']['WriteProblem'](arg1);
 }
+
+export function WriteSolution(arg1, arg2) {
+  return window['go']['models']['Service']['WriteSolution'](arg1, arg2);
+}

@@ -1,7 +1,7 @@
 package python
 
-type Runner struct{}
+type Python struct{}
 
-func (p *Runner) Name() string {
-	return "python"
+func (p *Python) Name() string {
+	return "Python"
 }

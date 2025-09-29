@@ -16,6 +16,7 @@ type Problem struct {
 	Description string `json:"description"`
 	Time        int    `json:"time"`
 	Memory      int    `json:"memory"`
+	IOMode      int    `json:"io_mode"` // 0: stdio, 1: fileio
 }
 
 type TestCase struct {

@@ -1,9 +1,10 @@
 package common
 
 type TestSolveResult struct {
-	Verdict string `json:"verdict"`
-	Time    int64  `json:"time"`
-	Memory  int    `json:"memory"`
+	Verdict       string `json:"verdict"`
+	Time          int64  `json:"time"`
+	Memory        int    `json:"memory"`
+	TestRunOutput string `json:"-"`
 }
 
 type TestRunData struct {
@@ -13,6 +14,7 @@ type TestRunData struct {
 	MaxMemory  int
 	TestInput  string
 	TestOutput string
+	IOMode     int
 }
 
 type Runner interface {

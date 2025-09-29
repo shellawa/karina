@@ -17,6 +17,7 @@
   import * as Select from "$lib/components/ui/select"
   import CodeEditor from "$lib/components/widgets/code-editor.svelte"
   import AddManualTest from "./addManualTest.svelte"
+  import { GenerateTests } from "$lib/wailsjs/go/languages/Service"
 
   let filePath = $state("")
   async function selectSolutionFile() {
@@ -105,7 +106,9 @@
         </div>
       </Card.Content>
       <Card.Footer>
-        <Button class="ml-auto" onclick={() => console.log(generatorScript)}>Generate</Button>
+        <Button class="ml-auto" onclick={async () => await GenerateTests(selectedProblemId, 1)}>
+          Generate
+        </Button>
       </Card.Footer>
     </Card.Root>
   </div>

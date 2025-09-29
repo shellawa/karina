@@ -110,7 +110,13 @@
 
         <Button
           class="h-12 w-full"
-          onclick={() => RunAllParticipants(selectedProblemId, selectedProblem?.time ?? 1500, 1024)}
+          onclick={() =>
+            RunAllParticipants(
+              selectedProblemId,
+              selectedProblem?.time ?? 1500,
+              1024,
+              selectedProblem?.io_mode ?? 0
+            )}
         >
           <Play /> Run all participants
         </Button>
@@ -118,7 +124,7 @@
           {#key selectedProblemId}
             <AddAndEditDialog
               dialogType="add"
-              problem={{ id: "", description: "", label: "", time: 1500, memory: 512 }}
+              problem={{ id: "", description: "", label: "", time: 1500, memory: 512, io_mode: 0 }}
             />
 
             <AddAndEditDialog dialogType="edit" problem={selectedProblem!} />

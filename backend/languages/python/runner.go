@@ -6,44 +6,54 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
-
-type Runner struct{}
-
-func (p *Runner) Name() string {
-	return "python"
-}
 
 func (p *Runner) Run(d common.TestRunData) common.TestSolveResult {
 	cwd, _ := os.Getwd()
 	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")
-	verdict := "AC"
 
-	// context to interrupt process with time limit
 	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*time.Duration(d.MaxTime))
 	defer cancel()
 
 	cmd := exec.CommandContext(ctx, pythonRuntime, d.ProblemId+".py")
 	cmd.Dir = d.WorkingDir
 
+	var testRunOutput string
+
+	if d.IOMode == 0 {
+		cmd.Stdin = strings.NewReader(d.TestInput)
+	}
+
 	startTime := time.Now()
 	takenTime := int64(d.MaxTime)
 
-	_, err := cmd.CombinedOutput()
+	out, err := cmd.CombinedOutput()
+	if d.IOMode == 0 {
+		testRunOutput = string(out)
+	} else {
+		outFile, err := os.ReadFile(filepath.Join(d.WorkingDir, d.ProblemId+".out"))
+		if err == nil {
+			testRunOutput = string(outFile)
+		}
+	}
+
+	verdict := "AC"
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
 			verdict = "TLE"
 		} else {
-			verdict = "Other"
+			verdict = "RE"
 		}
 	} else {
 		takenTime = time.Since(startTime).Milliseconds()
 	}
 
 	return common.TestSolveResult{
-		Verdict: verdict,
-		Time:    takenTime,
-		Memory:  456,
+		Verdict:       verdict,
+		Time:          takenTime,
+		Memory:        727,
+		TestRunOutput: testRunOutput,
 	}
 }

@@ -3,6 +3,7 @@
   import * as Dialog from "$lib/components/ui/dialog"
   import Input from "$lib/components/ui/input/input.svelte"
   import { Label } from "$lib/components/ui/label"
+  import * as Select from "$lib/components/ui/select"
   import { Textarea } from "$lib/components/ui/textarea"
   import { type models } from "$lib/wailsjs/go/models"
   import { WriteProblem } from "$lib/wailsjs/go/models/Service"
@@ -10,6 +11,8 @@
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
   let fieldProblem = $state(JSON.parse(JSON.stringify(problem ?? {}))) as models.Problem
+
+  $inspect(fieldProblem)
 </script>
 
 <Dialog.Root>
@@ -44,13 +47,31 @@
           bind:value={fieldProblem.id}
           disabled={dialogType == "edit"}
         />
+
         <Label class="mb-2">Label</Label>
         <Input type="text" placeholder="Two sum" bind:value={fieldProblem.label} />
+
         <Label class="mb-2">Description</Label>
         <Textarea
           placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
           bind:value={fieldProblem.description}
         />
+
+        <Label class="mb-2">IO Mode</Label>
+        <Select.Root
+          type="single"
+          bind:value={
+            () => fieldProblem.io_mode.toString(), (v: string) => (fieldProblem.io_mode = Number(v))
+          }
+        >
+          <Select.Trigger class="w-[180px]">
+            {fieldProblem.io_mode ? "File IO" : "Standard IO"}
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Item value="0">Standard IO</Select.Item>
+            <Select.Item value="1">File IO</Select.Item>
+          </Select.Content>
+        </Select.Root>
       </div>
 
       <div class="space-y-3">

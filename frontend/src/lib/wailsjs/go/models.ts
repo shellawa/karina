@@ -25,6 +25,7 @@ export namespace models {
 	    description: string;
 	    time: number;
 	    memory: number;
+	    io_mode: number;
 	}
 	export interface TestCase {
 	    Id: string;

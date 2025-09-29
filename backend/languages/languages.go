@@ -7,6 +7,7 @@ import (
 	"karina/backend/models"
 	"karina/backend/utils"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -48,7 +49,7 @@ type TestContext struct {
 	Output string
 }
 
-func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory int) {
+func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory int, IOMode int) {
 	modelsService := &models.Service{}
 	modelsService.Initialize(s.ctx)
 	participants := modelsService.GetParticipants(problemId)
@@ -60,7 +61,6 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 	)
 
 	var solves []SolveContext
-
 	problemDir := filepath.Join("data", "problems", problemId)
 
 	for _, participant := range participants {
@@ -106,56 +106,62 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 	)
 
 	// wait for the frontend to re-sort
-	time.Sleep(time.Millisecond * 1000)
+	time.Sleep(time.Second)
 
 	for _, solve := range solves {
 		for i, test := range solve.Tests {
-			// copy inp file to submission folder (working folder)
-			utils.CopyFile(
-				filepath.Join(problemDir, "tests", test.Id, problemId+".inp"),
-				filepath.Join(solve.SubmissionDir, problemId+".inp"),
-				0644,
-			)
 
-			runtime.EventsEmit(
-				s.ctx,
-				"solve:test_run_start",
-				SolveProgressUpdate{
-					ParticipantId: solve.ParticipantId,
-					Language:      "Python",
-					TestNo:        i + 1,
-				})
+			if IOMode == 1 {
+				// fileio: copy .inp file into working dir
+				utils.CopyFile(
+					filepath.Join(problemDir, "tests", test.Id, problemId+".inp"),
+					filepath.Join(solve.SubmissionDir, problemId+".inp"),
+					0644,
+				)
+			}
 
-			testSolveResult := s.runners["python"].Run(common.TestRunData{
+			runtime.EventsEmit(s.ctx, "solve:test_run_start", SolveProgressUpdate{
+				ParticipantId: solve.ParticipantId,
+				Language:      "Python",
+				TestNo:        i + 1,
+			})
+
+			// build test run data
+			runData := common.TestRunData{
 				ProblemId:  problemId,
 				WorkingDir: solve.SubmissionDir,
 				MaxTime:    maxTime,
 				MaxMemory:  maxMemory,
 				TestInput:  test.Input,
 				TestOutput: test.Output,
-			})
-
-			// compare the outputs
-			if testSolveResult.Verdict == "AC" {
-				solveOutputBytes, _ := os.ReadFile(filepath.Join(solve.SubmissionDir, problemId+".out"))
-				solveOutput := string(solveOutputBytes)
-				if !utils.CompareOutputs(test.Output, solveOutput) {
-					testSolveResult.Verdict = "WA"
-				}
+				IOMode:     IOMode,
 			}
 
-			// copy out file to the solve's test folder
-			utils.CopyFile(
-				filepath.Join(solve.SubmissionDir, problemId+".out"),
-				filepath.Join(test.Dir, problemId+".out"),
-				0644,
-			)
+			testSolveResult := s.runners["python"].Run(runData)
+
+			// compare the outputs
+			if !utils.CompareOutputs(test.Output, testSolveResult.TestRunOutput) {
+				testSolveResult.Verdict = "WA"
+			}
+
+			if IOMode == 1 {
+				// fileio: copy out file to test run folder
+				utils.CopyFile(
+					filepath.Join(solve.SubmissionDir, problemId+".out"),
+					filepath.Join(test.Dir, problemId+".out"),
+					0644,
+				)
+
+				// cleanup input/output for next test
+				os.Remove(filepath.Join(solve.SubmissionDir, problemId+".inp"))
+				os.Remove(filepath.Join(solve.SubmissionDir, problemId+".out"))
+			} else {
+				// stdio: copy captured output to test run folder
+				outFile := filepath.Join(test.Dir, problemId+".out")
+				os.WriteFile(outFile, []byte(testSolveResult.TestRunOutput), 0644)
+			}
 
 			models.DB.Write(test.Dir, "result", testSolveResult)
-
-			// remove inp and out file of the test to prepare for the next one
-			os.Remove(filepath.Join(solve.SubmissionDir, problemId+".inp"))
-			os.Remove(filepath.Join(solve.SubmissionDir, problemId+".out"))
 
 			runtime.EventsEmit(
 				s.ctx,
@@ -163,7 +169,7 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 			)
 		}
 
-		time.Sleep(time.Millisecond * 300)
+		time.Sleep(300 * time.Millisecond)
 	}
 
 	runtime.EventsEmit(
@@ -171,5 +177,22 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 		"solve:run_status",
 		"finished",
 	)
+}
 
+func (s *Service) GenerateTests(problemId string, testNum int) {
+	generatorDir := filepath.Join("data", "problems", problemId, "generator")
+	// scriptPath := filepath.Join(generatorDir, "generate.py")
+
+	// solutionPath := filepath.Join(generatorDir, "solution.py")
+
+	cwd, _ := os.Getwd()
+	pythonRuntime := filepath.Join(cwd, "assets", "runtimes", "python", "pythonw.exe")
+
+	cmd := exec.Command(pythonRuntime, "generate.py")
+	cmd.Dir = generatorDir
+
+	for i := 0; i < testNum; i++ {
+		stdoutStderr, _ := cmd.CombinedOutput()
+		os.WriteFile(filepath.Join(generatorDir, problemId+".inp"), stdoutStderr, 0644)
+	}
 }

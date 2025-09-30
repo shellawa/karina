@@ -131,7 +131,7 @@
           {/key}
         </div>
 
-        <Button variant="outline" class="h-10 w-full">
+        <Button variant="outline" disabled class="h-10 w-full">
           <Download /> Export Results
         </Button>
       </Card.Content>

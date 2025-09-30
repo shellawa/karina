@@ -12,12 +12,12 @@
       </div>
 
       <div class="flex items-center space-x-3">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" disabled size="sm">
           <Settings />
           Settings
         </Button>
 
-        <Button variant="outline" size="icon" class="size-8">
+        <Button variant="outline" disabled size="icon" class="size-8">
           <Moon />
         </Button>
       </div>

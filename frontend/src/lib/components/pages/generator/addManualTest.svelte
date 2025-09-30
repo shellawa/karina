@@ -5,7 +5,7 @@
 </script>
 
 <Dialog.Root>
-  <Dialog.Trigger class={buttonVariants({ variant: "outline", size: "sm" })}>
+  <Dialog.Trigger disabled class={buttonVariants({ variant: "outline", size: "sm" })}>
     <Plus /> Add manually
   </Dialog.Trigger>
 </Dialog.Root>

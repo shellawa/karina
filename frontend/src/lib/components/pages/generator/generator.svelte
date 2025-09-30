@@ -19,6 +19,7 @@
   import CodeEditor from "$lib/components/widgets/code-editor.svelte"
   import AddManualTest from "./addManualTest.svelte"
   import { GenerateTests } from "$lib/wailsjs/go/languages/Service"
+  import { DeleteTest } from "$lib/wailsjs/go/models/Service"
 
   let filePath = $state("")
   async function selectSolutionFile() {
@@ -147,7 +148,11 @@
               <div class="rounded-lg border p-3 transition-colors hover:bg-gray-50">
                 <div class="mb-2 flex items-center justify-between">
                   <span class="font-medium">{testCase.Id}</span>
-                  <Button variant="ghost" size="sm">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onclick={() => DeleteTest(selectedProblemId, testCase.Id)}
+                  >
                     <Trash2 class="h-4 w-4" />
                   </Button>
                 </div>

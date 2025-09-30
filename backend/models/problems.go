@@ -125,6 +125,14 @@ func (s *Service) GetTestCases(problemId string) []TestCase {
 	return testCases
 }
 
+func (s *Service) DeleteTest(problemId string, testName string) {
+	testsDirPath := filepath.Join("data", "problems", problemId, "tests", testName)
+	os.RemoveAll(testsDirPath)
+
+	// todo: give it a specific event
+	runtime.EventsEmit(s.ctx, "generate:test_generated")
+}
+
 // wouldn't recalling this everytime a new test is judge very costly?
 func (s *Service) GetSolveResults(problemId string) []ParticipantSolveResult {
 	participantSolveResults := []ParticipantSolveResult{}

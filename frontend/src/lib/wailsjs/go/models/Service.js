@@ -14,6 +14,10 @@ export function DeleteProblem(arg1) {
   return window['go']['models']['Service']['DeleteProblem'](arg1);
 }
 
+export function DeleteTest(arg1, arg2) {
+  return window['go']['models']['Service']['DeleteTest'](arg1, arg2);
+}
+
 export function GetGeneratorScript(arg1) {
   return window['go']['models']['Service']['GetGeneratorScript'](arg1);
 }

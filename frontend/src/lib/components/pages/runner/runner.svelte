@@ -165,21 +165,7 @@
           </div>
 
           <div class="space-y-1.5">
-            <div class="text-sm font-semibold">Queue Status</div>
-            <div class="space-y-1 text-sm">
-              <div class="flex justify-between">
-                <span class="font-medium text-green-600">Completed</span>
-                <span class="font-mono font-semibold">3/6</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="font-medium text-blue-600">Running</span>
-                <span class="font-mono font-semibold">1/6</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="font-medium text-gray-600">Pending</span>
-                <span class="font-mono font-semibold">2/6</span>
-              </div>
-            </div>
+            <div class="text-sm font-semibold">Progress</div>
           </div>
           <Progress
             value={participants.findIndex((x) => x.id == solveProgress.participantId) *
@@ -227,6 +213,9 @@
             .map((p) => {
               const res = solveResults.find((x) => x.id === p.id)?.results ?? []
               const ac = res.filter((z) => z.verdict === "AC")
+              const wa = res.filter((z) => z.verdict === "WA")
+              const tle = res.filter((z) => z.verdict === "TLE")
+              const pending = res.filter((z) => !z.verdict)
 
               const acCount = ac.length
               const totalTime = ac.reduce((s, z) => s + z.time, 0)
@@ -237,7 +226,24 @@
               const minMemory = ac.length ? Math.min(...ac.map((z) => z.memory)) : 0
               const maxMemory = ac.length ? Math.max(...ac.map((z) => z.memory)) : 0
 
-              return { ...p, acCount, totalTime, totalMemory, minTime, maxTime, minMemory, maxMemory }
+              let status
+              if (pending.length === testCases.length) {
+                status = "Pending"
+              } else if (pending.length !== 0) {
+                status = "Running"
+              } else if (ac.length === testCases.length) {
+                status = "Accepted"
+              } else if (ac.length > 0) {
+                status = "Partial"
+              } else if (wa.length === testCases.length) {
+                status = "WA"
+              } else if (tle.length === testCases.length) {
+                status = "TLE"
+              } else {
+                status = "Pending"
+              }
+
+              return { ...p, acCount, totalTime, totalMemory, minTime, maxTime, minMemory, maxMemory, status }
             })
             .sort((a, b) => {
               if (a.acCount !== b.acCount) return b.acCount - a.acCount
@@ -267,7 +273,20 @@
               <!-- status badge and passed/total -->
               <div class="col-span-4 flex items-center">
                 <div class="flex flex-col items-center">
-                  <Badge class="bg-green-400">Accepted</Badge>
+                  {#if ptcp.status == "Accepted"}
+                    <Badge class="bg-green-400">{ptcp.status}</Badge>
+                  {:else if ptcp.status == "Partial"}
+                    <Badge class="bg-yellow-500">{ptcp.status}</Badge>
+                  {:else if ptcp.status == "TLE"}
+                    <Badge class="bg-amber-600">{ptcp.status}</Badge>
+                  {:else if ptcp.status == "WA"}
+                    <Badge class="bg-red-500">{ptcp.status}</Badge>
+                  {:else if ptcp.status == "Running"}
+                    <Badge class="bg-blue-500">{ptcp.status}</Badge>
+                  {:else if ptcp.status == "Pending"}
+                    <Badge variant="outline">{ptcp.status}</Badge>
+                  {/if}
+
                   <div class="text-xs font-medium text-gray-700">
                     {ptcp.acCount}/{testCases.length}
                   </div>
@@ -290,6 +309,8 @@
                 </div>
               </div>
             </div>
+          {:else}
+            <div class="text-center text-gray-600">No participants yet</div>
           {/each}
         </div>
       </Card.Content>

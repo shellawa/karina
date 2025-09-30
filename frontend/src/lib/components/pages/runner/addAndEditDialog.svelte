@@ -6,7 +6,7 @@
   import * as Select from "$lib/components/ui/select"
   import { Textarea } from "$lib/components/ui/textarea"
   import { type models } from "$lib/wailsjs/go/models"
-  import { WriteProblem } from "$lib/wailsjs/go/models/Service"
+  import { WriteProblem, DeleteProblem } from "$lib/wailsjs/go/models/Service"
   import { Plus, Settings, Trash } from "@lucide/svelte"
 
   let { dialogType, problem }: { dialogType: string; problem: models.Problem } = $props()
@@ -99,7 +99,11 @@
         </Dialog.Close>
       {:else if dialogType == "edit"}
         <div class="flex w-full items-stretch justify-between">
-          <Dialog.Close>
+          <Dialog.Close
+            onclick={() => {
+              DeleteProblem(problem.id)
+            }}
+          >
             <Button variant="destructive"><Trash /> Delete</Button>
           </Dialog.Close>
           <Dialog.Close>

@@ -7,6 +7,8 @@ export function AddOneParticipant(arg1:models.Participant,arg2:string):Promise<v
 
 export function AddSubmission(arg1:string,arg2:string,arg3:string):Promise<void>;
 
+export function DeleteProblem(arg1:string):Promise<void>;
+
 export function GetGeneratorScript(arg1:string):Promise<string>;
 
 export function GetParticipants(arg1:string):Promise<Array<models.Participant>>;

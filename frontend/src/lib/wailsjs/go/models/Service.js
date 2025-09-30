@@ -10,6 +10,10 @@ export function AddSubmission(arg1, arg2, arg3) {
   return window['go']['models']['Service']['AddSubmission'](arg1, arg2, arg3);
 }
 
+export function DeleteProblem(arg1) {
+  return window['go']['models']['Service']['DeleteProblem'](arg1);
+}
+
 export function GetGeneratorScript(arg1) {
   return window['go']['models']['Service']['GetGeneratorScript'](arg1);
 }

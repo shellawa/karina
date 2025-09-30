@@ -55,6 +55,18 @@ func (s *Service) GetProblems() []Problem {
 	return problems
 }
 
+func (s *Service) DeleteProblem(problemId string) {
+	problemPath := filepath.Join("data", "problems", problemId)
+	os.RemoveAll(problemPath)
+
+	remainingProblems := s.GetProblems()
+	if len(remainingProblems) != 0 {
+		runtime.EventsEmit(s.ctx, "problem:change", remainingProblems[0].Id)
+	} else {
+		runtime.EventsEmit(s.ctx, "problem:change", "")
+	}
+}
+
 func (s *Service) AddSubmission(sourcePath string, participantId string, problemId string) {
 	_, fileName := filepath.Split(sourcePath)
 	submissionsDir := filepath.Join("data", "problems", problemId, "participants", participantId, "submissions")

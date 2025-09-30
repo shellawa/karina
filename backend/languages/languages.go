@@ -139,7 +139,7 @@ func (s *Service) RunAllParticipants(problemId string, maxTime int, maxMemory in
 			testSolveResult := s.languages["python"].Run(s.ctx, runData)
 
 			// compare the outputs
-			if !utils.CompareOutputs(test.Output, testSolveResult.TestRunOutput) {
+			if !utils.CompareOutputs(test.Output, testSolveResult.TestRunOutput) && testSolveResult.Verdict == "AC" {
 				testSolveResult.Verdict = "WA"
 			}
 

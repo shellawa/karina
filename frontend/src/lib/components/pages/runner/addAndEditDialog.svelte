@@ -92,6 +92,7 @@
         <Dialog.Close class="float-right">
           <Button
             variant="default"
+            disabled={!fieldProblem.id || !fieldProblem.label}
             onclick={() => {
               WriteProblem(fieldProblem)
             }}>Add problem</Button

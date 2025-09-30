@@ -54,7 +54,11 @@
     </form>
     <Dialog.Footer class="border-t pt-5">
       <Dialog.Close class="float-right">
-        <Button type="submit" onclick={handleAdd}>Add</Button>
+        <Button
+          type="submit"
+          disabled={!fieldParticipant.id || !fieldParticipant.name}
+          onclick={handleAdd}>Add</Button
+        >
       </Dialog.Close>
     </Dialog.Footer>
   </Dialog.Content>

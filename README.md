@@ -1,16 +1,44 @@
-# README
+# karina v0.1.0a
 
-## About
+## Overview
 
-This is the official Wails Svelte template.
+karina is a competitive programming test generator/judge, built with wails and svelte.
 
-## Live Development
+The project is under active development, expect bugs and missing features.
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+## Features (so far)
 
-## Building
+- Run many participants at the same time.
+- Generate tests with a simple python script.
 
-To build a redistributable, production mode package, use `wails build`.
+## Supported runtimes
+
+- Cpython 3.13.7
+- More coming soon.
+
+## Installation
+
+1. Download the release archive (`karina_0.1.0a_windows_amd64.zip`)
+2. Unzip it to a folder
+3. Run `karina.exe`
+
+## Building and Developing
+
+You don't want to do this.
+
+Prerequisites:
+
+- Go 1.23
+- Wails CLI
+- NodeJS and pnpm
+- upx for compressing the binary (optional)
+
+Steps:
+
+```sh
+git clone https://github.com/shellawa/karina.git
+cd karina
+cd frontend && pnpm install
+cd ..
+wails dev -s / wails build (-upx)
+```

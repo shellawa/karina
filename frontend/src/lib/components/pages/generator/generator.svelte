@@ -158,7 +158,7 @@
                 </div>
                 <div class="rounded bg-gray-50 p-2 font-mono text-sm">
                   <div class="text-gray-600">Input:</div>
-                  <div class="whitespace-pre">{testCase.Input}</div>
+                  <div class="overflow-y-auto whitespace-pre">{testCase.Input}</div>
                   <div class="mt-2 text-gray-600">Expected Output:</div>
                   <div class="whitespace-pre">{testCase.Output}</div>
                 </div>

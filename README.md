@@ -1,4 +1,4 @@
-# karina v0.1.0a
+# karina v0.1.1a
 
 ## Overview
 
@@ -18,7 +18,7 @@ The project is under active development, expect bugs and missing features.
 
 ## Installation
 
-1. Download the release archive (`karina_0.1.0a_windows_amd64.zip`)
+1. Download the release archive (`karina_0.1.1a_windows_amd64.zip`)
 2. Unzip it to a folder
 3. Run `karina.exe`
 

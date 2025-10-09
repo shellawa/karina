@@ -13,6 +13,8 @@ export function DeleteTest(arg1:string,arg2:string):Promise<void>;
 
 export function GetGeneratorScript(arg1:string):Promise<string>;
 
+export function GetLastSubmittedCode(arg1:string,arg2:string):Promise<string>;
+
 export function GetParticipants(arg1:string):Promise<Array<models.Participant>>;
 
 export function GetProblems():Promise<Array<models.Problem>>;

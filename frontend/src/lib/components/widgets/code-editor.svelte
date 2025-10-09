@@ -11,9 +11,10 @@
     value: string
     language?: string
     theme?: string
+    readonly?: boolean
   }
 
-  let { value = $bindable(), language, theme }: Props = $props()
+  let { value = $bindable(), language, theme, readonly = false }: Props = $props()
 
   onMount(async () => {
     const monacoEditor = await import("monaco-editor")
@@ -29,7 +30,8 @@
       minimap: { enabled: false },
       overviewRulerLanes: 0,
       overviewRulerBorder: false,
-      scrollbar: { vertical: "hidden", horizontal: "hidden" }
+      scrollbar: { vertical: "hidden", horizontal: "hidden" },
+      readOnly: readonly
     })
 
     editor.onDidChangeModelContent(() => {
@@ -42,11 +44,6 @@
       editor.setValue(value)
     }
   })
-
-  // onDestroy(() => {
-  //   monaco.editor.getModels().forEach((m) => m.dispose())
-  //   editor.dispose()
-  // })
 </script>
 
 <div class="container h-[400px] rounded-lg border px-1.5" bind:this={editorContainer}></div>

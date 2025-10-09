@@ -10,7 +10,7 @@
     GetTestCases,
     GetSolveResults
   } from "$lib/wailsjs/go/models/Service"
-  import type { models } from "$lib/wailsjs/go/models"
+  import type { common, models } from "$lib/wailsjs/go/models"
   import { Badge } from "$lib/components/ui/badge"
   import { Button } from "$lib/components/ui/button"
   import * as Card from "$lib/components/ui/card"
@@ -19,6 +19,8 @@
   import Progress from "$lib/components/ui/progress/progress.svelte"
   import AddAndEditDialog from "./addAndEditDialog.svelte"
   import AddParticipantDialog from "./addParticipantDialog.svelte"
+  import SubmissionDetailsDialog from "./submissionDetailsDialog.svelte"
+  import type { ParticipantSolveDetails } from "$lib/types"
 
   let problems = $state<models.Problem[]>([])
 
@@ -197,7 +199,7 @@
       <Card.Content>
         <!-- table header -->
         <div
-          class="grid-cols-22 mb-4 grid gap-4 rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600"
+          class="grid-cols-25 mb-4 grid gap-4 rounded-lg bg-gray-50 px-4 py-3 text-sm font-medium text-gray-600"
         >
           <div class="col-span-2">#</div>
           <div class="col-span-6">Name</div>
@@ -205,6 +207,7 @@
           <div class="col-span-4">Status</div>
           <div class="col-span-3">Time</div>
           <div class="col-span-3">Memory</div>
+          <div class="col-span-2"></div>
         </div>
 
         <!-- table content -->
@@ -243,7 +246,9 @@
                 status = "Pending"
               }
 
-              return { ...p, acCount, totalTime, totalMemory, minTime, maxTime, minMemory, maxMemory, status }
+              const details: ParticipantSolveDetails = { ...p, acCount, totalTime, totalMemory, minTime, maxTime, minMemory, maxMemory, status, res, testCases }
+
+              return details
             })
             .sort((a, b) => {
               if (a.acCount !== b.acCount) return b.acCount - a.acCount
@@ -252,7 +257,7 @@
             }) as ptcp, index (ptcp.id)}
             <div
               animate:flip={{ duration: 400 }}
-              class="grid-cols-22 bg-card grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
+              class="grid-cols-25 bg-card grid gap-4 rounded-lg border px-4 py-3 transition-colors hover:bg-gray-50"
             >
               <!-- rank -->
               <div class="col-span-2 flex items-center font-medium text-gray-600">#{index + 1}</div>
@@ -306,6 +311,12 @@
                 <div class="flex flex-col items-center">
                   <div class="">{ptcp.totalMemory}MB</div>
                   <div class="text-xs text-gray-500">{ptcp.minMemory}-{ptcp.maxMemory}</div>
+                </div>
+              </div>
+
+              <div class="col-span-2 flex items-center font-mono">
+                <div class="flex flex-col items-center">
+                  <SubmissionDetailsDialog details={ptcp} />
                 </div>
               </div>
             </div>

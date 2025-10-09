@@ -6,7 +6,7 @@ type TestSolveResult struct {
 	Verdict       string `json:"verdict"`
 	Time          int64  `json:"time"`
 	Memory        int    `json:"memory"`
-	TestRunOutput string `json:"-"`
+	TestRunOutput string `json:"actual_output"`
 }
 
 type TestRunData struct {

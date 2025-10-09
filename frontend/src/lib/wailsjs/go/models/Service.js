@@ -22,6 +22,10 @@ export function GetGeneratorScript(arg1) {
   return window['go']['models']['Service']['GetGeneratorScript'](arg1);
 }
 
+export function GetLastSubmittedCode(arg1, arg2) {
+  return window['go']['models']['Service']['GetLastSubmittedCode'](arg1, arg2);
+}
+
 export function GetParticipants(arg1) {
   return window['go']['models']['Service']['GetParticipants'](arg1);
 }

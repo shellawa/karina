@@ -4,6 +4,7 @@ export namespace common {
 	    verdict: string;
 	    time: number;
 	    memory: number;
+	    actual_output: string;
 	}
 
 }
@@ -14,6 +15,7 @@ export namespace models {
 	    id: string;
 	    name: string;
 	    organization: string;
+	    code?: string;
 	}
 	export interface ParticipantSolveResult {
 	    id: string;

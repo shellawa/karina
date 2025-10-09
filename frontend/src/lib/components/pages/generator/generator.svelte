@@ -21,6 +21,8 @@
   import { GenerateTests } from "$lib/wailsjs/go/languages/Service"
   import { DeleteTest } from "$lib/wailsjs/go/models/Service"
 
+  let isMounted = false
+
   let filePath = $state("")
   async function selectSolutionFile() {
     const path = await SelectFile()
@@ -41,9 +43,11 @@
   })
 
   let generatorScript = $state("")
+  let ds = $derived(!!generatorScript)
+  $inspect(ds)
 
   $effect(() => {
-    if (selectedProblemId) {
+    if (selectedProblemId && !(!isMounted && !generatorScript)) {
       WriteGeneratorScript(selectedProblemId, generatorScript)
     }
   })
@@ -54,13 +58,14 @@
       selectedProblemId = problems[0].id
       generatorScript = await GetGeneratorScript(selectedProblemId)
     }
+    isMounted = true
   })
 
-  EventsOn("problem:change", async (id) => {
-    problems = await GetProblems()
-    selectedProblemId = id
-    generatorScript = await GetGeneratorScript(selectedProblemId)
-  })
+  // EventsOn("problem:change", async (id) => {
+  //   problems = await GetProblems()
+  //   selectedProblemId = id
+  //   generatorScript = await GetGeneratorScript(selectedProblemId)
+  // })
 
   EventsOn("generate:test_generated", () => {
     dummy++
